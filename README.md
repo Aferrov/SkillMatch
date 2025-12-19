@@ -1,7 +1,7 @@
 
   # App UI Design
 
-  El prototipo del proyecto de SkillMatch: (https://www.canva.com/design/DAG5_TO-Dxg/RxMsqIRtZ_ZI25glP4dmhA/edit?utm_content=DAG5_TO-Dxg&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton)
+  This is a code bundle for App UI Design. The original project is available at https://www.figma.com/design/6pRtEZdFBTPIU5OuWntcj2/App-UI-Design.
 
   ## Running the code
 
