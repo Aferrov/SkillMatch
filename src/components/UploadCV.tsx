@@ -1,14 +1,51 @@
 import { useState } from 'react';
-import { Upload, FileText, X, ArrowLeft, Target } from 'lucide-react';
+import {
+  Upload,
+  FileText,
+  X,
+  ArrowLeft,
+  Linkedin,
+  Zap,
+  ShieldCheck,
+  AlertCircle,
+  CheckCircle2,
+  Loader2,
+} from 'lucide-react';
 
 interface UploadCVProps {
   onUpload: () => void;
   onBack: () => void;
+  onManualEntry: () => void;
 }
 
-export function UploadCV({ onUpload, onBack }: UploadCVProps) {
+const ACCEPTED_MIME_TYPES = [
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+];
+
+const MAX_SIZE_MB = 10;
+
+export function UploadCV({ onUpload, onBack, onManualEntry }: UploadCVProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [fileError, setFileError] = useState('');
+
+  const [linkedinUrl, setLinkedinUrl] = useState('');
+  const [linkedinStatus, setLinkedinStatus] = useState<
+    'idle' | 'connecting' | 'error'
+  >('idle');
+  const [linkedinError, setLinkedinError] = useState('');
+
+  const validateFile = (file: File): string => {
+    if (!ACCEPTED_MIME_TYPES.includes(file.type)) {
+      return 'Formato no válido. Sube un archivo PDF, DOC o DOCX.';
+    }
+    if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+      return `El archivo supera los ${MAX_SIZE_MB} MB.`;
+    }
+    return '';
+  };
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -23,16 +60,26 @@ export function UploadCV({ onUpload, onBack }: UploadCVProps) {
     e.preventDefault();
     setIsDragging(false);
     const file = e.dataTransfer.files[0];
-    if (file && (file.type === 'application/pdf' || file.type === 'application/msword' || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')) {
-      setSelectedFile(file);
+    if (!file) return;
+    const err = validateFile(file);
+    if (err) {
+      setFileError(err);
+      return;
     }
+    setFileError('');
+    setSelectedFile(file);
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setSelectedFile(file);
+    if (!file) return;
+    const err = validateFile(file);
+    if (err) {
+      setFileError(err);
+      return;
     }
+    setFileError('');
+    setSelectedFile(file);
   };
 
   const handleUpload = () => {
@@ -41,121 +88,311 @@ export function UploadCV({ onUpload, onBack }: UploadCVProps) {
     }
   };
 
+  const handleLinkedinConnect = () => {
+    const url = linkedinUrl.trim();
+    if (!url) {
+      setLinkedinError('Ingresa la URL de tu perfil de LinkedIn.');
+      return;
+    }
+    if (!/linkedin\.com\/in\//i.test(url)) {
+      setLinkedinError(
+        'La URL debe ser un perfil válido (linkedin.com/in/usuario).'
+      );
+      return;
+    }
+    setLinkedinError('');
+    setLinkedinStatus('connecting');
+    // Simulación de OAuth / scraping de perfil
+    setTimeout(() => {
+      onUpload();
+    }, 1500);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-<header className="bg-white border-b border-gray-200">
-  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-    <div className="flex items-center justify-between">
-      <div className="flex items-center gap-4">
-
-        <button onClick={onBack} className="text-gray-600 hover:text-gray-900">
-          <ArrowLeft size={24} />
-        </button>
-
-        <div className="flex items-center gap-2">
-
-          {/* 👉 Nuevo logo */}
-          <div className="w-10 h-10 rounded-lg overflow-hidden">
-            <img
-              src="/logo_skillmatch.png"   // Asegúrate de tener esta imagen en /public
-              alt="SkillMatch Logo"
-              className="w-full h-full object-cover"
-            />
+      <header className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={onBack}
+              className="text-gray-600 hover:text-gray-900"
+              aria-label="Volver"
+            >
+              <ArrowLeft size={24} />
+            </button>
+            <div className="flex items-center gap-2">
+              <div className="w-10 h-10 rounded-lg overflow-hidden">
+                <img
+                  src="/logo_skillmatch.png"
+                  alt="SkillMatch"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <span className="text-gray-900 font-semibold text-lg">
+                SkillMatch
+              </span>
+            </div>
           </div>
-
-          <span className="text-gray-900">SkillMatch</span>
         </div>
+      </header>
 
+      {/* Progress */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white">
+                ✓
+              </div>
+              <span className="text-gray-600 hidden sm:inline">
+                Cuenta creada
+              </span>
+            </div>
+            <div className="flex-1 h-1 bg-blue-600"></div>
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white">
+                2
+              </div>
+              <span className="text-gray-900 hidden sm:inline">Tu perfil</span>
+            </div>
+            <div className="flex-1 h-1 bg-gray-200"></div>
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-gray-400">
+                3
+              </div>
+              <span className="text-gray-400 hidden sm:inline">Análisis</span>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
-</header>
 
-
-      {/* Main Content */}
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="text-center mb-8">
-          <h1 className="text-gray-900 mb-4">Sube tu Currículum</h1>
+      {/* Main */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 px-3 py-1 rounded-full mb-4">
+            <Zap size={16} />
+            <span className="text-sm">Onboarding en un solo paso</span>
+          </div>
+          <h1
+            className="text-gray-900 mb-3"
+            style={{ fontSize: '32px', fontWeight: 700 }}
+          >
+            Importa tu información en segundos
+          </h1>
           <p className="text-gray-600">
-            Carga tu CV en formato PDF o Word para comenzar el análisis
+            Sin formularios largos. Sube tu CV o conecta tu LinkedIn y nosotros
+            extraemos todo automáticamente.
           </p>
         </div>
 
-        {/* Upload Area */}
-        <div className="bg-white rounded-2xl shadow-sm p-8 mb-6">
-          <div
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            className={`border-2 border-dashed rounded-xl p-12 text-center transition-colors ${
-              isDragging
-                ? 'border-blue-500 bg-blue-50'
-                : 'border-gray-300 hover:border-gray-400'
-            }`}
-          >
-            {selectedFile ? (
-              <div className="space-y-4">
-                <div className="flex items-center justify-center gap-4">
-                  <FileText className="text-blue-600" size={48} />
-                  <div className="text-left">
+        {/* Two-path onboarding */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          {/* Path 1: CV upload */}
+          <div className="bg-white rounded-2xl shadow-sm p-8 border border-gray-100">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                <FileText className="text-blue-600" size={24} />
+              </div>
+              <div>
+                <h2 className="text-gray-900">Sube tu CV</h2>
+                <p className="text-gray-600 text-sm">
+                  PDF o Word, hasta {MAX_SIZE_MB} MB
+                </p>
+              </div>
+            </div>
+
+            <div
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
+                isDragging
+                  ? 'border-blue-500 bg-blue-50'
+                  : 'border-gray-300 hover:border-gray-400'
+              }`}
+            >
+              {selectedFile ? (
+                <div className="space-y-3">
+                  <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+                    <CheckCircle2 className="text-green-600" size={24} />
+                  </div>
+                  <div>
                     <p className="text-gray-900">{selectedFile.name}</p>
-                    <p className="text-gray-500">
+                    <p className="text-gray-500 text-sm">
                       {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
                     </p>
                   </div>
                   <button
-                    onClick={() => setSelectedFile(null)}
-                    className="text-gray-400 hover:text-gray-600"
+                    onClick={() => {
+                      setSelectedFile(null);
+                      setFileError('');
+                    }}
+                    className="inline-flex items-center gap-1 text-gray-500 hover:text-gray-700 text-sm"
                   >
-                    <X size={24} />
+                    <X size={14} />
+                    Quitar archivo
                   </button>
                 </div>
-              </div>
-            ) : (
-              <>
-                <Upload className="mx-auto text-gray-400 mb-4" size={48} />
-                <p className="text-gray-900 mb-2">
-                  Arrastra y suelta tu archivo aquí
-                </p>
-                <p className="text-gray-500 mb-4">o</p>
-                <label className="inline-block">
-                  <span className="bg-blue-600 text-white px-6 py-3 rounded-lg cursor-pointer hover:bg-blue-700 transition-colors inline-block">
-                    Seleccionar archivo
-                  </span>
-                  <input
-                    type="file"
-                    accept=".pdf,.doc,.docx"
-                    onChange={handleFileSelect}
-                    className="hidden"
+              ) : (
+                <>
+                  <Upload
+                    className="mx-auto text-gray-400 mb-3"
+                    size={36}
                   />
-                </label>
-                <p className="text-gray-500 mt-4">
-                  Formatos aceptados: PDF, DOC, DOCX (Max. 10MB)
-                </p>
-              </>
+                  <p className="text-gray-700 mb-1">
+                    Arrastra tu archivo aquí
+                  </p>
+                  <p className="text-gray-500 text-sm mb-4">o</p>
+                  <label className="inline-block">
+                    <span className="bg-blue-600 text-white px-5 py-2 rounded-lg cursor-pointer hover:bg-blue-700 transition-colors inline-block">
+                      Seleccionar archivo
+                    </span>
+                    <input
+                      type="file"
+                      accept=".pdf,.doc,.docx"
+                      onChange={handleFileSelect}
+                      className="hidden"
+                    />
+                  </label>
+                  <p className="text-gray-500 text-xs mt-4">
+                    Formatos: PDF, DOC, DOCX
+                  </p>
+                </>
+              )}
+            </div>
+
+            {fileError && (
+              <div className="bg-red-100 text-red-700 rounded-lg p-4 flex items-center gap-2 mt-4">
+                <AlertCircle size={18} className="flex-shrink-0" />
+                <span className="text-sm">{fileError}</span>
+              </div>
             )}
+
+            <button
+              onClick={handleUpload}
+              disabled={!selectedFile}
+              className={`w-full py-3 rounded-lg transition-colors mt-6 ${
+                selectedFile
+                  ? 'bg-blue-600 text-white hover:bg-blue-700'
+                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+              }`}
+            >
+              Analizar mi CV
+            </button>
+          </div>
+
+          {/* Path 2: LinkedIn */}
+          <div className="bg-white rounded-2xl shadow-sm p-8 border border-gray-100">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
+                <Linkedin className="text-white" size={24} />
+              </div>
+              <div>
+                <h2 className="text-gray-900">Conecta con LinkedIn</h2>
+                <p className="text-gray-600 text-sm">
+                  Importamos tu perfil automáticamente
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-blue-50 rounded-xl p-5 mb-4">
+              <p className="text-gray-700 mb-3 text-sm">
+                Trae automáticamente tu:
+              </p>
+              <ul className="space-y-2">
+                {[
+                  'Experiencia laboral',
+                  'Habilidades y validaciones',
+                  'Estudios y certificaciones',
+                  'Foto de perfil',
+                ].map((item) => (
+                  <li
+                    key={item}
+                    className="flex items-center gap-2 text-gray-600 text-sm"
+                  >
+                    <CheckCircle2
+                      className="text-blue-600 flex-shrink-0"
+                      size={16}
+                    />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <label className="block text-gray-700 mb-2 text-sm">
+              URL de tu perfil de LinkedIn
+            </label>
+            <input
+              type="url"
+              value={linkedinUrl}
+              onChange={(e) => {
+                setLinkedinUrl(e.target.value);
+                if (linkedinError) setLinkedinError('');
+              }}
+              disabled={linkedinStatus === 'connecting'}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="https://linkedin.com/in/tu-usuario"
+            />
+
+            {linkedinError && (
+              <div className="bg-red-100 text-red-700 rounded-lg p-4 flex items-center gap-2 mt-4">
+                <AlertCircle size={18} className="flex-shrink-0" />
+                <span className="text-sm">{linkedinError}</span>
+              </div>
+            )}
+
+            <button
+              onClick={handleLinkedinConnect}
+              disabled={linkedinStatus === 'connecting'}
+              className={`w-full py-3 rounded-lg transition-colors mt-6 flex items-center justify-center gap-2 ${
+                linkedinStatus === 'connecting'
+                  ? 'bg-blue-600 text-white cursor-not-allowed'
+                  : 'bg-blue-600 text-white hover:bg-blue-700'
+              }`}
+            >
+              {linkedinStatus === 'connecting' ? (
+                <>
+                  <Loader2 className="animate-spin" size={18} />
+                  Conectando…
+                </>
+              ) : (
+                <>
+                  <Linkedin size={18} />
+                  Conectar con LinkedIn
+                </>
+              )}
+            </button>
           </div>
         </div>
 
-        {/* Upload Button */}
-        <button
-          onClick={handleUpload}
-          disabled={!selectedFile}
-          className={`w-full py-4 rounded-lg transition-colors ${
-            selectedFile
-              ? 'bg-blue-600 text-white hover:bg-blue-700'
-              : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-          }`}
-        >
-          Analizar Currículum
-        </button>
+        {/* Info / Privacy */}
+        <div className="bg-blue-50 rounded-xl p-6 flex items-start gap-4">
+          <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center flex-shrink-0">
+            <ShieldCheck className="text-blue-600" size={20} />
+          </div>
+          <div>
+            <h3 className="text-gray-900 mb-1">Tu información está protegida</h3>
+            <p className="text-gray-600 text-sm">
+              Solo usamos tu CV o tu perfil para generar recomendaciones
+              personalizadas. No compartimos tus datos con terceros y puedes
+              eliminarlos cuando quieras desde tu panel.
+            </p>
+          </div>
+        </div>
 
-        {/* Info */}
-        <div className="mt-8 bg-blue-50 rounded-lg p-6">
-          <h3 className="text-gray-900 mb-2">Privacidad de tus datos</h3>
-          <p className="text-gray-600">
-            Tu información es tratada con total confidencialidad. No compartimos ni almacenamos tus datos sin tu consentimiento.
+        {/* Alternative */}
+        <div className="text-center mt-6">
+          <p className="text-gray-500 text-sm">
+            ¿No tienes CV ni LinkedIn?{' '}
+            <button
+              type="button"
+              onClick={onManualEntry}
+              className="text-blue-600 hover:underline"
+            >
+              Completar mi perfil manualmente
+            </button>
           </p>
         </div>
       </div>
