@@ -12,7 +12,7 @@ import {
 import { ImageWithFallback } from './figma/ImageWithFallback';
 
 interface HomeProps {
-  onNavigate: () => void;
+  onNavigate: (screen: 'login' | 'register') => void;
 }
 
 export function Home({ onNavigate }: HomeProps) {
@@ -47,7 +47,7 @@ export function Home({ onNavigate }: HomeProps) {
                 Beneficios
               </a>
               <button
-                onClick={onNavigate}
+                onClick={() => onNavigate('login')}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
                 Iniciar Sesión
@@ -84,7 +84,7 @@ export function Home({ onNavigate }: HomeProps) {
 
             <div className="flex flex-wrap gap-3 mb-8">
               <button
-                onClick={onNavigate}
+                onClick={() => onNavigate('register')}
                 className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
               >
                 Analizar mi CV
@@ -257,7 +257,7 @@ export function Home({ onNavigate }: HomeProps) {
             Solo necesitas unos minutos.
           </p>
           <button
-            onClick={onNavigate}
+            onClick={() => onNavigate('register')}
             className="inline-flex items-center gap-2 bg-white text-blue-600 px-8 py-3 rounded-lg hover:bg-gray-100 transition-colors"
           >
             Analizar mi CV

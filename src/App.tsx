@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Home } from './components/Home';
+import { Login } from './components/Login';
 import { RegisterPricing } from './components/RegisterPricing';
 import { UploadCV } from './components/UploadCV';
 import { PreferencesForm } from './components/PreferencesForm';
@@ -7,7 +8,15 @@ import { AnalysisProcess } from './components/AnalysisProcess';
 import { Recommendations } from './components/Recommendations';
 import { UserDashboard } from './components/UserDashboard';
 
-type Screen = 'home' | 'register' | 'upload' | 'preferences' | 'analyzing' | 'recommendations' | 'dashboard';
+type Screen =
+  | 'home'
+  | 'login'
+  | 'register'
+  | 'upload'
+  | 'preferences'
+  | 'analyzing'
+  | 'recommendations'
+  | 'dashboard';
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('home');
@@ -15,38 +24,47 @@ export default function App() {
   return (
     <div>
       {currentScreen === 'home' && (
-        <Home onNavigate={() => setCurrentScreen('register')} />
+        <Home onNavigate={(screen) => setCurrentScreen(screen)} />
       )}
-      
+
+      {currentScreen === 'login' && (
+        <Login
+          onLogin={() => setCurrentScreen('dashboard')}
+          onBack={() => setCurrentScreen('home')}
+          onGoToRegister={() => setCurrentScreen('register')}
+        />
+      )}
+
       {currentScreen === 'register' && (
-        <RegisterPricing 
-          onContinue={() => setCurrentScreen('upload')} 
-          onBack={() => setCurrentScreen('home')} 
+        <RegisterPricing
+          onContinue={() => setCurrentScreen('upload')}
+          onBack={() => setCurrentScreen('home')}
+          onGoToLogin={() => setCurrentScreen('login')}
         />
       )}
-      
+
       {currentScreen === 'upload' && (
-        <UploadCV 
-          onUpload={() => setCurrentScreen('preferences')} 
-          onBack={() => setCurrentScreen('register')} 
+        <UploadCV
+          onUpload={() => setCurrentScreen('preferences')}
+          onBack={() => setCurrentScreen('register')}
         />
       )}
-      
+
       {currentScreen === 'preferences' && (
-        <PreferencesForm 
-          onComplete={() => setCurrentScreen('analyzing')} 
-          onBack={() => setCurrentScreen('upload')} 
+        <PreferencesForm
+          onComplete={() => setCurrentScreen('analyzing')}
+          onBack={() => setCurrentScreen('upload')}
         />
       )}
-      
+
       {currentScreen === 'analyzing' && (
         <AnalysisProcess onComplete={() => setCurrentScreen('recommendations')} />
       )}
-      
+
       {currentScreen === 'recommendations' && (
         <Recommendations onNavigate={() => setCurrentScreen('dashboard')} />
       )}
-      
+
       {currentScreen === 'dashboard' && (
         <UserDashboard onNavigate={(screen) => setCurrentScreen(screen as Screen)} />
       )}
