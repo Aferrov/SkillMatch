@@ -2,21 +2,26 @@ import {
   Target, TrendingUp, Briefcase, GraduationCap, ArrowRight, AlertCircle,
   CheckCircle2, Star, MapPin, Building2, DollarSign, Clock, BookOpen
 } from 'lucide-react';
-import { getVacancyById, formatSalary } from '../data/vacancies';
+import { VACANCIES, formatSalary } from '../data/vacancies';
+import { MOCK_USER_PROFILE } from '../data/userProfile';
+import { calculateAllMatches, matchBadgeClasses } from '../data/matching';
 
 interface RecommendationsProps {
   onNavigate: () => void;
   onSeeAllVacancies?: () => void;
 }
 
-const MATCHED_VACANCIES: { id: string; match: number }[] = [
-  { id: 'pm-ti-interbank', match: 95 },
-  { id: 'coord-proyectos-yura', match: 92 },
-  { id: 'jefe-proyectos-credicorp', match: 88 },
-  { id: 'analista-proyectos-backus', match: 85 },
-];
-
 export function Recommendations({ onNavigate, onSeeAllVacancies }: RecommendationsProps) {
+  const allMatches = calculateAllMatches(MOCK_USER_PROFILE, VACANCIES);
+  const topMatches = allMatches.slice(0, 4);
+  const compatibleCount = allMatches.filter((m) => m.score >= 60).length;
+  const avgMatch =
+    topMatches.length === 0
+      ? 0
+      : Math.round(
+          topMatches.reduce((sum, m) => sum + m.score, 0) / topMatches.length,
+        );
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -75,7 +80,7 @@ export function Recommendations({ onNavigate, onSeeAllVacancies }: Recommendatio
     fontWeight: '500',
     fontSize: '40px',
     lineHeight: '1',
-  }}>85%</span>
+  }}>{avgMatch}%</span>
               </div>
               <p className="text-blue-100">Match Promedio</p>
             </div>
@@ -86,7 +91,7 @@ export function Recommendations({ onNavigate, onSeeAllVacancies }: Recommendatio
     fontWeight: '500',
     fontSize: '40px',
     lineHeight: '1',
-  }}>12</span>
+  }}>{compatibleCount}</span>
               </div>
               <p className="text-blue-100">Empleos Compatibles</p>
             </div>
@@ -121,12 +126,11 @@ export function Recommendations({ onNavigate, onSeeAllVacancies }: Recommendatio
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {MATCHED_VACANCIES.map(({ id, match }) => {
-              const job = getVacancyById(id);
-              if (!job) return null;
+            {topMatches.map((m) => {
+              const job = m.vacancy;
               return (
                 <div
-                  key={id}
+                  key={job.id}
                   className="bg-white rounded-xl shadow-sm p-6 border border-gray-200 hover:border-blue-500 transition-colors"
                 >
                   <div className="flex items-start justify-between mb-4">
@@ -160,23 +164,50 @@ export function Recommendations({ onNavigate, onSeeAllVacancies }: Recommendatio
                       </div>
                     </div>
                     <div className="ml-4">
-                      <div className={`text-center px-4 py-2 rounded-lg ${
-                        match >= 90 ? 'bg-green-100 text-green-700' :
-                        match >= 85 ? 'bg-blue-100 text-blue-700' :
-                        'bg-purple-100 text-purple-700'
-                      }`}>
-                        <div className="font-semibold">{match}%</div>
+                      <div className={`text-center px-4 py-2 rounded-lg ${matchBadgeClasses(m.score)}`}>
+                        <div className="font-semibold">{m.score}%</div>
                         <div className="text-xs">Match</div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {job.requiredSkills.slice(0, 4).map((skill) => (
-                      <span
-                        key={skill}
-                        className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"
+                  {/* Breakdown */}
+                  <div className="grid grid-cols-4 gap-2 mb-4">
+                    {[
+                      { label: 'Skills', value: m.breakdown.skillsScore },
+                      { label: 'Exp.', value: m.breakdown.experienceScore },
+                      { label: 'Modal.', value: m.breakdown.modalidadScore },
+                      { label: 'Ubic.', value: m.breakdown.locationScore },
+                    ].map((b) => (
+                      <div
+                        key={b.label}
+                        className="bg-gray-50 rounded-lg px-2 py-2 text-center"
                       >
+                        <div className="text-gray-900 text-sm font-semibold">
+                          {b.value}%
+                        </div>
+                        <div className="text-gray-500 text-xs">{b.label}</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Skill chips with matched/missing */}
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {m.matchedRequiredSkills.slice(0, 4).map((skill) => (
+                      <span
+                        key={`m-${skill}`}
+                        className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm"
+                      >
+                        <CheckCircle2 size={12} />
+                        {skill}
+                      </span>
+                    ))}
+                    {m.missingRequiredSkills.slice(0, 2).map((skill) => (
+                      <span
+                        key={`x-${skill}`}
+                        className="inline-flex items-center gap-1 px-3 py-1 bg-orange-50 text-orange-700 rounded-full text-sm"
+                      >
+                        <AlertCircle size={12} />
                         {skill}
                       </span>
                     ))}
@@ -321,15 +352,15 @@ export function Recommendations({ onNavigate, onSeeAllVacancies }: Recommendatio
           <h2 className="text-gray-900 mb-6 text-center">Resumen de Oportunidades</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div className="text-center">
-              <div className="text-blue-600 mb-2">12</div>
-              <p className="text-gray-600">Empleos Disponibles</p>
+              <div className="text-blue-600 mb-2">{compatibleCount}</div>
+              <p className="text-gray-600">Empleos Compatibles</p>
             </div>
             <div className="text-center">
               <div className="text-purple-600 mb-2">5</div>
               <p className="text-gray-600">Cursos Recomendados</p>
             </div>
             <div className="text-center">
-              <div className="text-green-600 mb-2">85%</div>
+              <div className="text-green-600 mb-2">{avgMatch}%</div>
               <p className="text-gray-600">Match Promedio</p>
             </div>
             <div className="text-center">

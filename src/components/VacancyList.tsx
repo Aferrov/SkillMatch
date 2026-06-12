@@ -11,6 +11,8 @@ import {
   X,
   ChevronDown,
   ChevronUp,
+  CheckCircle2,
+  AlertCircle,
 } from 'lucide-react';
 import {
   VACANCIES,
@@ -19,10 +21,14 @@ import {
   getUniqueModalidades,
   type Modalidad,
 } from '../data/vacancies';
+import { MOCK_USER_PROFILE } from '../data/userProfile';
+import { calculateAllMatches, matchBadgeClasses, matchLabel } from '../data/matching';
 
 interface VacancyListProps {
   onBack: () => void;
 }
+
+type SortMode = 'match' | 'recent';
 
 export function VacancyList({ onBack }: VacancyListProps) {
   const [query, setQuery] = useState('');
@@ -30,14 +36,20 @@ export function VacancyList({ onBack }: VacancyListProps) {
     'Todas',
   );
   const [locationFilter, setLocationFilter] = useState<string>('Todas');
+  const [sortMode, setSortMode] = useState<SortMode>('match');
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const locations = useMemo(() => getUniqueLocations(), []);
   const modalidades = useMemo(() => getUniqueModalidades(), []);
+  const allMatches = useMemo(
+    () => calculateAllMatches(MOCK_USER_PROFILE, VACANCIES),
+    [],
+  );
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return VACANCIES.filter((v) => {
+    const base = allMatches.filter((m) => {
+      const v = m.vacancy;
       if (modalidadFilter !== 'Todas' && v.modalidad !== modalidadFilter) {
         return false;
       }
@@ -55,7 +67,15 @@ export function VacancyList({ onBack }: VacancyListProps) {
         .toLowerCase();
       return haystack.includes(q);
     });
-  }, [query, modalidadFilter, locationFilter]);
+    if (sortMode === 'match') {
+      return base;
+    }
+    return [...base].sort(
+      (a, b) =>
+        new Date(b.vacancy.postedAt).getTime() -
+        new Date(a.vacancy.postedAt).getTime(),
+    );
+  }, [allMatches, query, modalidadFilter, locationFilter, sortMode]);
 
   const clearFilters = () => {
     setQuery('');
@@ -187,19 +207,43 @@ export function VacancyList({ onBack }: VacancyListProps) {
             </div>
           </div>
 
-          {hasFilters && (
-            <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-4">
-              <span className="text-gray-600 text-sm">
-                {filtered.length} resultado{filtered.length === 1 ? '' : 's'}
-              </span>
-              <button
-                onClick={clearFilters}
-                className="text-blue-600 hover:underline text-sm"
-              >
-                Limpiar filtros
-              </button>
+          <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-4 gap-3 flex-wrap">
+            <span className="text-gray-600 text-sm">
+              {filtered.length} resultado{filtered.length === 1 ? '' : 's'}
+            </span>
+            <div className="flex items-center gap-3">
+              <div className="inline-flex border border-gray-200 rounded-lg overflow-hidden text-sm">
+                <button
+                  onClick={() => setSortMode('match')}
+                  className={`px-3 py-1 transition-colors ${
+                    sortMode === 'match'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-white text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  Mejor match
+                </button>
+                <button
+                  onClick={() => setSortMode('recent')}
+                  className={`px-3 py-1 transition-colors ${
+                    sortMode === 'recent'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-white text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  Más recientes
+                </button>
+              </div>
+              {hasFilters && (
+                <button
+                  onClick={clearFilters}
+                  className="text-blue-600 hover:underline text-sm"
+                >
+                  Limpiar filtros
+                </button>
+              )}
             </div>
-          )}
+          </div>
         </div>
 
         {/* Results */}
@@ -219,7 +263,8 @@ export function VacancyList({ onBack }: VacancyListProps) {
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {filtered.map((v) => {
+            {filtered.map((m) => {
+              const v = m.vacancy;
               const isExpanded = expandedId === v.id;
               return (
                 <div
@@ -234,17 +279,10 @@ export function VacancyList({ onBack }: VacancyListProps) {
                         <span>{v.company}</span>
                       </div>
                     </div>
-                    <span
-                      className={`px-3 py-1 rounded-full text-sm ${
-                        v.modalidad === 'Remoto'
-                          ? 'bg-green-100 text-green-700'
-                          : v.modalidad === 'Híbrido'
-                          ? 'bg-blue-100 text-blue-700'
-                          : 'bg-orange-100 text-orange-700'
-                      }`}
-                    >
-                      {v.modalidad}
-                    </span>
+                    <div className={`text-center px-3 py-2 rounded-lg ${matchBadgeClasses(m.score)}`}>
+                      <div className="font-semibold">{m.score}%</div>
+                      <div className="text-xs">Match</div>
+                    </div>
                   </div>
 
                   <div className="flex flex-wrap gap-3 text-gray-600 mb-4">
@@ -258,7 +296,7 @@ export function VacancyList({ onBack }: VacancyListProps) {
                     </div>
                     <div className="inline-flex items-center gap-1">
                       <Clock size={16} />
-                      <span>{v.contractType}</span>
+                      <span>{v.modalidad} · {v.contractType}</span>
                     </div>
                     <div className="inline-flex items-center gap-1">
                       <Briefcase size={16} />
@@ -271,24 +309,69 @@ export function VacancyList({ onBack }: VacancyListProps) {
                     </div>
                   </div>
 
+                  {/* Match breakdown */}
+                  <div className="grid grid-cols-4 gap-2 mb-4">
+                    {[
+                      { label: 'Skills', value: m.breakdown.skillsScore },
+                      { label: 'Exp.', value: m.breakdown.experienceScore },
+                      { label: 'Modal.', value: m.breakdown.modalidadScore },
+                      { label: 'Ubic.', value: m.breakdown.locationScore },
+                    ].map((b) => (
+                      <div
+                        key={b.label}
+                        className="bg-gray-50 rounded-lg px-2 py-2 text-center"
+                      >
+                        <div className="text-gray-900 text-sm font-semibold">
+                          {b.value}%
+                        </div>
+                        <div className="text-gray-500 text-xs">{b.label}</div>
+                      </div>
+                    ))}
+                  </div>
+
                   <div className="mb-4">
                     <p className="text-gray-600 text-sm mb-2">
                       Habilidades requeridas
                     </p>
                     <div className="flex flex-wrap gap-2">
-                      {v.requiredSkills.map((s) => (
-                        <span
-                          key={s}
-                          className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm"
-                        >
-                          {s}
-                        </span>
-                      ))}
+                      {v.requiredSkills.map((s) => {
+                        const isMatched = m.matchedRequiredSkills.includes(s);
+                        return (
+                          <span
+                            key={s}
+                            className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm ${
+                              isMatched
+                                ? 'bg-green-100 text-green-700'
+                                : 'bg-orange-50 text-orange-700'
+                            }`}
+                          >
+                            {isMatched ? (
+                              <CheckCircle2 size={12} />
+                            ) : (
+                              <AlertCircle size={12} />
+                            )}
+                            {s}
+                          </span>
+                        );
+                      })}
                     </div>
                   </div>
 
                   {isExpanded && (
                     <div className="border-t border-gray-100 pt-4 mb-4 space-y-4">
+                      <div>
+                        <p className="text-gray-600 text-sm mb-1">
+                          Diagnóstico de compatibilidad
+                        </p>
+                        <p className="text-gray-900">
+                          {matchLabel(m.score)} · coincides en{' '}
+                          {m.matchedRequiredSkills.length} de{' '}
+                          {v.requiredSkills.length} skills requeridas
+                          {m.missingRequiredSkills.length > 0 &&
+                            ` · te faltan ${m.missingRequiredSkills.length}`}
+                          .
+                        </p>
+                      </div>
                       <div>
                         <p className="text-gray-600 text-sm mb-1">
                           Descripción
@@ -314,17 +397,26 @@ export function VacancyList({ onBack }: VacancyListProps) {
                       {v.niceToHaveSkills && v.niceToHaveSkills.length > 0 && (
                         <div>
                           <p className="text-gray-600 text-sm mb-2">
-                            Deseables
+                            Deseables ({m.matchedNiceToHaveSkills.length}/
+                            {v.niceToHaveSkills.length} cubiertos)
                           </p>
                           <div className="flex flex-wrap gap-2">
-                            {v.niceToHaveSkills.map((s) => (
-                              <span
-                                key={s}
-                                className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"
-                              >
-                                {s}
-                              </span>
-                            ))}
+                            {v.niceToHaveSkills.map((s) => {
+                              const isMatched =
+                                m.matchedNiceToHaveSkills.includes(s);
+                              return (
+                                <span
+                                  key={s}
+                                  className={`px-3 py-1 rounded-full text-sm ${
+                                    isMatched
+                                      ? 'bg-green-100 text-green-700'
+                                      : 'bg-gray-100 text-gray-700'
+                                  }`}
+                                >
+                                  {s}
+                                </span>
+                              );
+                            })}
                           </div>
                         </div>
                       )}

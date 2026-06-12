@@ -23,6 +23,7 @@ interface UserDashboardProps {
       | "home"
       | "upload"
       | "analyzing"
+      | "results"
       | "recommendations"
       | "vacancies"
       | "dashboard",
@@ -391,6 +392,12 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
                   className="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   Nuevo Análisis
+                </button>
+                <button
+                  onClick={() => onNavigate("results")}
+                  className="w-full py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Ver mi Diagnóstico
                 </button>
                 <button
                   onClick={() => onNavigate("recommendations")}
