@@ -1,13 +1,22 @@
-import { 
-  Target, TrendingUp, Briefcase, GraduationCap, ArrowRight, AlertCircle, 
-  CheckCircle2, Star, MapPin, Building2, DollarSign, Clock, BookOpen 
+import {
+  Target, TrendingUp, Briefcase, GraduationCap, ArrowRight, AlertCircle,
+  CheckCircle2, Star, MapPin, Building2, DollarSign, Clock, BookOpen
 } from 'lucide-react';
+import { getVacancyById, formatSalary } from '../data/vacancies';
 
 interface RecommendationsProps {
   onNavigate: () => void;
+  onSeeAllVacancies?: () => void;
 }
 
-export function Recommendations({ onNavigate }: RecommendationsProps) {
+const MATCHED_VACANCIES: { id: string; match: number }[] = [
+  { id: 'pm-ti-interbank', match: 95 },
+  { id: 'coord-proyectos-yura', match: 92 },
+  { id: 'jefe-proyectos-credicorp', match: 88 },
+  { id: 'analista-proyectos-backus', match: 85 },
+];
+
+export function Recommendations({ onNavigate, onSeeAllVacancies }: RecommendationsProps) {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -102,105 +111,83 @@ export function Recommendations({ onNavigate }: RecommendationsProps) {
               <h2 className="text-gray-900 mb-1">Empleos que Coinciden con tu Perfil</h2>
               <p className="text-gray-600">Oportunidades laborales disponibles en Arequipa y Perú</p>
             </div>
-            <button className="text-blue-600 hover:underline inline-flex items-center gap-1">
+            <button
+              onClick={onSeeAllVacancies}
+              className="text-blue-600 hover:underline inline-flex items-center gap-1"
+            >
               Ver todos
               <ArrowRight size={16} />
             </button>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {[
-              {
-                title: 'Project Manager TI',
-                company: 'Interbank',
-                location: 'Arequipa, Perú',
-                salary: 'S/ 6,500 - S/ 9,000',
-                type: 'Tiempo completo',
-                match: 95,
-                skills: ['Scrum', 'Gestión de equipos', 'Agile'],
-              },
-              {
-                title: 'Coordinador de Proyectos',
-                company: 'Yura S.A.',
-                location: 'Arequipa, Perú (Presencial)',
-                salary: 'S/ 4,000 - S/ 6,000',
-                type: 'Presencial',
-                match: 92,
-                skills: ['Liderazgo', 'Planificación', 'Reportes'],
-              },
-              {
-                title: 'Jefe de Proyectos TI',
-                company: 'Credicorp',
-                location: 'Lima, Perú (Remoto / Híbrido)',
-                salary: 'S/ 8,000 - S/ 11,000',
-                type: 'Híbrido',
-                match: 88,
-                skills: ['Metodologías ágiles', 'Gestión', 'Innovación'],
-              },
-              {
-                title: 'Analista de Proyectos',
-                company: 'Backus',
-                location: 'Arequipa, Perú',
-                salary: 'S/ 3,500 - S/ 5,500',
-                type: 'Tiempo completo',
-                match: 85,
-                skills: ['Scrum', 'Reportes', 'KPIs'],
-              },
-            ].map((job, index) => (
-              <div 
-                key={index} 
-                className="bg-white rounded-xl shadow-sm p-6 border border-gray-200 hover:border-blue-500 transition-colors"
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <h3 className="text-gray-900 mb-1">{job.title}</h3>
-                    <div className="flex items-center gap-2 text-gray-600 mb-2">
-                      <Building2 size={16} />
-                      <span>{job.company}</span>
+            {MATCHED_VACANCIES.map(({ id, match }) => {
+              const job = getVacancyById(id);
+              if (!job) return null;
+              return (
+                <div
+                  key={id}
+                  className="bg-white rounded-xl shadow-sm p-6 border border-gray-200 hover:border-blue-500 transition-colors"
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <h3 className="text-gray-900 mb-1">{job.title}</h3>
+                      <div className="flex items-center gap-2 text-gray-600 mb-2">
+                        <Building2 size={16} />
+                        <span>{job.company}</span>
+                      </div>
+                      <div className="flex flex-wrap gap-3 text-gray-600 mb-3">
+                        <div className="flex items-center gap-1">
+                          <MapPin size={16} />
+                          <span>{job.location}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <DollarSign size={16} />
+                          <span>{formatSalary(job.salary)}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Clock size={16} />
+                          <span>{job.modalidad}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Briefcase size={16} />
+                          <span>
+                            {job.experienciaMinimaAnios === 0
+                              ? 'Sin experiencia'
+                              : `${job.experienciaMinimaAnios}+ años`}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex flex-wrap gap-3 text-gray-600 mb-3">
-                      <div className="flex items-center gap-1">
-                        <MapPin size={16} />
-                        <span>{job.location}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <DollarSign size={16} />
-                        <span>{job.salary}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Clock size={16} />
-                        <span>{job.type}</span>
+                    <div className="ml-4">
+                      <div className={`text-center px-4 py-2 rounded-lg ${
+                        match >= 90 ? 'bg-green-100 text-green-700' :
+                        match >= 85 ? 'bg-blue-100 text-blue-700' :
+                        'bg-purple-100 text-purple-700'
+                      }`}>
+                        <div className="font-semibold">{match}%</div>
+                        <div className="text-xs">Match</div>
                       </div>
                     </div>
                   </div>
-                  <div className="ml-4">
-                    <div className={`text-center px-4 py-2 rounded-lg ${
-                      job.match >= 90 ? 'bg-green-100 text-green-700' :
-                      job.match >= 85 ? 'bg-blue-100 text-blue-700' :
-                      'bg-purple-100 text-purple-700'
-                    }`}>
-                      <div className="font-semibold">{job.match}%</div>
-                      <div className="text-xs">Match</div>
-                    </div>
+
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {job.requiredSkills.slice(0, 4).map((skill) => (
+                      <span
+                        key={skill}
+                        className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"
+                      >
+                        {skill}
+                      </span>
+                    ))}
                   </div>
-                </div>
 
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {job.skills.map((skill, skillIndex) => (
-                    <span 
-                      key={skillIndex} 
-                      className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"
-                    >
-                      {skill}
-                    </span>
-                  ))}
+                  <button className="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                    Ver Detalles
+                  </button>
                 </div>
-
-                <button className="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                  Ver Detalles
-                </button>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 

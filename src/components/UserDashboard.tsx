@@ -24,6 +24,7 @@ interface UserDashboardProps {
       | "upload"
       | "analyzing"
       | "recommendations"
+      | "vacancies"
       | "dashboard",
   ) => void;
 }
@@ -122,7 +123,10 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
           </div>
 
           {/* Ofertas Compatibles */}
-          <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-orange-600">
+          <button
+            onClick={() => onNavigate("vacancies")}
+            className="text-left bg-white rounded-xl shadow-sm p-6 border-l-4 border-orange-600 hover:border-blue-500 transition-colors"
+          >
             <div className="flex items-center justify-between mb-2">
               <span className="text-gray-600">Ofertas Compatibles</span>
               <Briefcase className="text-orange-600" size={20} />
@@ -132,8 +136,8 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
               <span className="text-orange-700 text-xl font-semibold">12</span>
             </div>
 
-            <p className="text-gray-500 text-center">3 nuevas hoy</p>
-          </div>
+            <p className="text-gray-500 text-center">Explorar base de datos</p>
+          </button>
         </div>
 
         {/* Subscription Plan */}
@@ -393,6 +397,12 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
                   className="w-full py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   Ver Recomendaciones
+                </button>
+                <button
+                  onClick={() => onNavigate("vacancies")}
+                  className="w-full py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Explorar Vacantes
                 </button>
               </div>
             </div>

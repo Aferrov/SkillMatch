@@ -6,7 +6,9 @@ import { UploadCV } from './components/UploadCV';
 import { ManualProfile } from './components/ManualProfile';
 import { PreferencesForm } from './components/PreferencesForm';
 import { AnalysisProcess } from './components/AnalysisProcess';
+import { CVAnalysisReview } from './components/CVAnalysisReview';
 import { Recommendations } from './components/Recommendations';
+import { VacancyList } from './components/VacancyList';
 import { UserDashboard } from './components/UserDashboard';
 
 type Screen =
@@ -17,7 +19,9 @@ type Screen =
   | 'manualProfile'
   | 'preferences'
   | 'analyzing'
+  | 'cvReview'
   | 'recommendations'
+  | 'vacancies'
   | 'dashboard';
 
 export default function App() {
@@ -68,11 +72,25 @@ export default function App() {
       )}
 
       {currentScreen === 'analyzing' && (
-        <AnalysisProcess onComplete={() => setCurrentScreen('recommendations')} />
+        <AnalysisProcess onComplete={() => setCurrentScreen('cvReview')} />
+      )}
+
+      {currentScreen === 'cvReview' && (
+        <CVAnalysisReview
+          onContinue={() => setCurrentScreen('recommendations')}
+          onBack={() => setCurrentScreen('analyzing')}
+        />
       )}
 
       {currentScreen === 'recommendations' && (
-        <Recommendations onNavigate={() => setCurrentScreen('dashboard')} />
+        <Recommendations
+          onNavigate={() => setCurrentScreen('dashboard')}
+          onSeeAllVacancies={() => setCurrentScreen('vacancies')}
+        />
+      )}
+
+      {currentScreen === 'vacancies' && (
+        <VacancyList onBack={() => setCurrentScreen('dashboard')} />
       )}
 
       {currentScreen === 'dashboard' && (
