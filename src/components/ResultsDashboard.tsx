@@ -32,6 +32,7 @@ interface ResultsDashboardProps {
   onSeeRecommendations: () => void;
   onSeeAllVacancies: () => void;
   onImproveProfile: () => void;
+  onSeeSkillGap: () => void;
 }
 
 const SUGGESTED_COURSES = [
@@ -80,6 +81,7 @@ export function ResultsDashboard({
   onSeeRecommendations,
   onSeeAllVacancies,
   onImproveProfile,
+  onSeeSkillGap,
 }: ResultsDashboardProps) {
   const matches = useMemo(
     () => calculateAllMatches(MOCK_USER_PROFILE, VACANCIES),
@@ -255,6 +257,13 @@ export function ResultsDashboard({
                   </p>
                 </div>
               </div>
+              <button
+                onClick={onSeeSkillGap}
+                className="text-blue-600 hover:underline inline-flex items-center gap-1 text-sm"
+              >
+                Análisis completo
+                <ArrowRight size={14} />
+              </button>
             </div>
             {missingSkills.length === 0 ? (
               <p className="text-gray-600">¡No detectamos brechas significativas!</p>
@@ -419,11 +428,18 @@ export function ResultsDashboard({
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             <button
-              onClick={onSeeRecommendations}
+              onClick={onSeeSkillGap}
               className="bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-colors inline-flex items-center justify-center gap-2"
             >
               <Target size={18} />
-              Ver detalles del análisis
+              Ver análisis de brechas
+            </button>
+            <button
+              onClick={onSeeRecommendations}
+              className="bg-white border border-blue-600 text-blue-600 px-4 py-3 rounded-lg hover:bg-blue-50 transition-colors inline-flex items-center justify-center gap-2"
+            >
+              <Sparkles size={18} />
+              Recomendaciones detalladas
             </button>
             <button
               onClick={onImproveProfile}

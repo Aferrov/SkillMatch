@@ -26,6 +26,7 @@ interface UserDashboardProps {
       | "results"
       | "recommendations"
       | "vacancies"
+      | "skillGap"
       | "dashboard",
   ) => void;
 }
@@ -398,6 +399,12 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
                   className="w-full py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   Ver mi Diagnóstico
+                </button>
+                <button
+                  onClick={() => onNavigate("skillGap")}
+                  className="w-full py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Análisis de Brechas
                 </button>
                 <button
                   onClick={() => onNavigate("recommendations")}
