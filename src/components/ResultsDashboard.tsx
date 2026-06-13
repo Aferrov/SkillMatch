@@ -26,6 +26,7 @@ import {
   aggregateMissingSkills,
   matchBadgeClasses,
 } from '../data/matching';
+import { recommendCoursesForGaps } from '../data/courses';
 
 interface ResultsDashboardProps {
   onBack: () => void;
@@ -33,34 +34,8 @@ interface ResultsDashboardProps {
   onSeeAllVacancies: () => void;
   onImproveProfile: () => void;
   onSeeSkillGap: () => void;
+  onSeeCourses: () => void;
 }
-
-const SUGGESTED_COURSES = [
-  {
-    title: 'Scrum Master PSM I',
-    provider: 'Kanban & Agile Perú',
-    duration: '20 horas',
-    level: 'Intermedio',
-    rating: 4.8,
-    related: 'PMI · Metodologías ágiles',
-  },
-  {
-    title: 'Inglés para Profesionales',
-    provider: 'Británico',
-    duration: '40 horas',
-    level: 'Avanzado',
-    rating: 4.7,
-    related: 'Inglés avanzado',
-  },
-  {
-    title: 'Power BI desde cero',
-    provider: 'Cibertec Perú',
-    duration: '15 horas',
-    level: 'Básico',
-    rating: 4.6,
-    related: 'Power BI / Tableau',
-  },
-];
 
 function profileScoreColor(total: number): string {
   if (total >= 80) return 'text-green-600';
@@ -82,6 +57,7 @@ export function ResultsDashboard({
   onSeeAllVacancies,
   onImproveProfile,
   onSeeSkillGap,
+  onSeeCourses,
 }: ResultsDashboardProps) {
   const matches = useMemo(
     () => calculateAllMatches(MOCK_USER_PROFILE, VACANCIES),
@@ -97,6 +73,13 @@ export function ResultsDashboard({
     () => aggregateMissingSkills(matches, 5),
     [matches],
   );
+  const courseRecs = useMemo(() => {
+    const gaps = aggregateMissingSkills(matches, 20).map((g) => ({
+      skill: g.skill,
+      demandCount: g.count,
+    }));
+    return recommendCoursesForGaps(gaps).slice(0, 3);
+  }, [matches]);
   const detectedTechnicalSkills = MOCK_USER_PROFILE.technicalSkills.slice(0, 10);
   const detectedSoftSkills = MOCK_USER_PROFILE.softSkills.slice(0, 6);
 
@@ -377,47 +360,63 @@ export function ResultsDashboard({
               </div>
             </div>
             <button
-              onClick={onSeeRecommendations}
+              onClick={onSeeCourses}
               className="text-blue-600 hover:underline inline-flex items-center gap-1"
             >
               Ver todos
               <ArrowRight size={16} />
             </button>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {SUGGESTED_COURSES.map((c) => (
-              <div
-                key={c.title}
-                className="border border-gray-200 rounded-lg p-4 hover:border-purple-300 transition-colors"
-              >
-                <div className="flex items-start justify-between mb-2">
-                  <h3 className="text-gray-900 flex-1">{c.title}</h3>
-                  <div className="inline-flex items-center gap-1 text-yellow-500 ml-2">
-                    <Star size={14} fill="currentColor" />
-                    <span className="text-gray-900 text-sm">{c.rating}</span>
+          {courseRecs.length === 0 ? (
+            <p className="text-gray-600">
+              No detectamos brechas con cursos disponibles. ¡Buen trabajo!
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {courseRecs.map((rec) => {
+                const c = rec.course;
+                return (
+                  <div
+                    key={c.id}
+                    className="border border-gray-200 rounded-lg p-4 hover:border-purple-300 transition-colors"
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <h3 className="text-gray-900 flex-1">{c.name}</h3>
+                      {c.rating && (
+                        <div className="inline-flex items-center gap-1 text-yellow-500 ml-2">
+                          <Star size={14} fill="currentColor" />
+                          <span className="text-gray-900 text-sm">{c.rating}</span>
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-gray-600 text-sm mb-2">{c.platform}</p>
+                    <div className="inline-flex items-center gap-1 px-2 py-1 bg-orange-50 text-orange-700 rounded text-xs mb-3">
+                      <AlertCircle size={12} />
+                      Para cubrir: {c.skill}
+                    </div>
+                    <div className="flex items-center gap-3 text-gray-600 text-sm mb-3">
+                      <div className="inline-flex items-center gap-1">
+                        <Clock size={14} />
+                        <span>{c.duration}</span>
+                      </div>
+                      <div className="inline-flex items-center gap-1">
+                        <BookOpen size={14} />
+                        <span>{c.level}</span>
+                      </div>
+                    </div>
+                    <a
+                      href={c.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full py-2 border border-purple-600 text-purple-600 rounded-lg hover:bg-blue-50 transition-colors text-sm inline-flex items-center justify-center"
+                    >
+                      Ver curso
+                    </a>
                   </div>
-                </div>
-                <p className="text-gray-600 text-sm mb-2">{c.provider}</p>
-                <div className="inline-flex items-center gap-1 px-2 py-1 bg-orange-50 text-orange-700 rounded text-xs mb-3">
-                  <AlertCircle size={12} />
-                  Relacionado con: {c.related}
-                </div>
-                <div className="flex items-center gap-3 text-gray-600 text-sm mb-3">
-                  <div className="inline-flex items-center gap-1">
-                    <Clock size={14} />
-                    <span>{c.duration}</span>
-                  </div>
-                  <div className="inline-flex items-center gap-1">
-                    <BookOpen size={14} />
-                    <span>{c.level}</span>
-                  </div>
-                </div>
-                <button className="w-full py-2 border border-purple-600 text-purple-600 rounded-lg hover:bg-blue-50 transition-colors text-sm">
-                  Ver curso
-                </button>
-              </div>
-            ))}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* SECTION 6: Acciones rápidas */}

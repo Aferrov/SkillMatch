@@ -11,6 +11,7 @@ import { ResultsDashboard } from './components/ResultsDashboard';
 import { Recommendations } from './components/Recommendations';
 import { VacancyList } from './components/VacancyList';
 import { SkillGapAnalysis } from './components/SkillGapAnalysis';
+import { CourseRecommendations } from './components/CourseRecommendations';
 import { UserDashboard } from './components/UserDashboard';
 
 type Screen =
@@ -26,6 +27,7 @@ type Screen =
   | 'recommendations'
   | 'vacancies'
   | 'skillGap'
+  | 'courses'
   | 'dashboard';
 
 export default function App() {
@@ -93,6 +95,7 @@ export default function App() {
           onSeeAllVacancies={() => setCurrentScreen('vacancies')}
           onImproveProfile={() => setCurrentScreen('cvReview')}
           onSeeSkillGap={() => setCurrentScreen('skillGap')}
+          onSeeCourses={() => setCurrentScreen('courses')}
         />
       )}
 
@@ -100,8 +103,12 @@ export default function App() {
         <SkillGapAnalysis
           onBack={() => setCurrentScreen('results')}
           onSeeVacancies={() => setCurrentScreen('vacancies')}
-          onSeeCourses={() => setCurrentScreen('recommendations')}
+          onSeeCourses={() => setCurrentScreen('courses')}
         />
+      )}
+
+      {currentScreen === 'courses' && (
+        <CourseRecommendations onBack={() => setCurrentScreen('results')} />
       )}
 
       {currentScreen === 'recommendations' && (
