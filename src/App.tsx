@@ -8,7 +8,7 @@ import { PreferencesForm } from './components/PreferencesForm';
 import { AnalysisProcess } from './components/AnalysisProcess';
 import { CVAnalysisReview } from './components/CVAnalysisReview';
 import { ResultsDashboard } from './components/ResultsDashboard';
-import { Recommendations } from './components/Recommendations';
+import { JobRecommendations } from './components/JobRecommendations';
 import { VacancyList } from './components/VacancyList';
 import { SkillGapAnalysis } from './components/SkillGapAnalysis';
 import { CourseRecommendations } from './components/CourseRecommendations';
@@ -112,8 +112,8 @@ export default function App() {
       )}
 
       {currentScreen === 'recommendations' && (
-        <Recommendations
-          onNavigate={() => setCurrentScreen('dashboard')}
+        <JobRecommendations
+          onBack={() => setCurrentScreen('results')}
           onSeeAllVacancies={() => setCurrentScreen('vacancies')}
         />
       )}
