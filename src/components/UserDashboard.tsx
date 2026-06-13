@@ -28,6 +28,7 @@ interface UserDashboardProps {
       | "vacancies"
       | "skillGap"
       | "courses"
+      | "profile"
       | "dashboard",
   ) => void;
 }
@@ -63,9 +64,13 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
               <button className="text-gray-600 hover:text-gray-900">
                 <Settings size={20} />
               </button>
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-400 rounded-full flex items-center justify-center">
+              <button
+                onClick={() => onNavigate("profile")}
+                className="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-400 rounded-full flex items-center justify-center hover:opacity-90"
+                title="Ver mi perfil"
+              >
                 <User className="text-white" size={20} />
-              </div>
+              </button>
             </div>
           </div>
         </div>
@@ -412,6 +417,12 @@ export function UserDashboard({ onNavigate }: UserDashboardProps) {
                   className="w-full py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   Cursos Recomendados
+                </button>
+                <button
+                  onClick={() => onNavigate("profile")}
+                  className="w-full py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  Mi Perfil
                 </button>
                 <button
                   onClick={() => onNavigate("recommendations")}

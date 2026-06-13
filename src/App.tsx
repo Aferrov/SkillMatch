@@ -12,6 +12,7 @@ import { JobRecommendations } from './components/JobRecommendations';
 import { VacancyList } from './components/VacancyList';
 import { SkillGapAnalysis } from './components/SkillGapAnalysis';
 import { CourseRecommendations } from './components/CourseRecommendations';
+import { ProfilePage } from './components/ProfilePage';
 import { UserDashboard } from './components/UserDashboard';
 
 type Screen =
@@ -28,6 +29,7 @@ type Screen =
   | 'vacancies'
   | 'skillGap'
   | 'courses'
+  | 'profile'
   | 'dashboard';
 
 export default function App() {
@@ -109,6 +111,10 @@ export default function App() {
 
       {currentScreen === 'courses' && (
         <CourseRecommendations onBack={() => setCurrentScreen('results')} />
+      )}
+
+      {currentScreen === 'profile' && (
+        <ProfilePage onBack={() => setCurrentScreen('dashboard')} />
       )}
 
       {currentScreen === 'recommendations' && (
