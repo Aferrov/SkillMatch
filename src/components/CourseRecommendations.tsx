@@ -13,7 +13,7 @@ import {
   X,
 } from 'lucide-react';
 import { VACANCIES } from '../data/vacancies';
-import { MOCK_USER_PROFILE } from '../data/userProfile';
+import type { UserProfile } from '../data/userProfile';
 import { calculateAllMatches, aggregateMissingSkills } from '../data/matching';
 import {
   recommendCoursesForGaps,
@@ -23,6 +23,7 @@ import {
 } from '../data/courses';
 
 interface CourseRecommendationsProps {
+  profile: UserProfile;
   onBack: () => void;
 }
 
@@ -33,7 +34,7 @@ const LEVELS: Array<CourseLevel | 'Todos'> = [
   'Avanzado',
 ];
 
-export function CourseRecommendations({ onBack }: CourseRecommendationsProps) {
+export function CourseRecommendations({ profile, onBack }: CourseRecommendationsProps) {
   const [query, setQuery] = useState('');
   const [levelFilter, setLevelFilter] = useState<CourseLevel | 'Todos'>('Todos');
   const [platformFilter, setPlatformFilter] = useState<CoursePlatform | 'Todas'>(
@@ -41,13 +42,13 @@ export function CourseRecommendations({ onBack }: CourseRecommendationsProps) {
   );
 
   const recommendations = useMemo(() => {
-    const matches = calculateAllMatches(MOCK_USER_PROFILE, VACANCIES);
+    const matches = calculateAllMatches(profile, VACANCIES);
     const gaps = aggregateMissingSkills(matches, 20).map((g) => ({
       skill: g.skill,
       demandCount: g.count,
     }));
     return recommendCoursesForGaps(gaps);
-  }, []);
+  }, [profile]);
 
   const platforms = useMemo(() => getUniquePlatforms(), []);
 

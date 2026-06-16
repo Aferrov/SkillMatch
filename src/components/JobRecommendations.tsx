@@ -15,7 +15,7 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import { VACANCIES, formatSalary } from '../data/vacancies';
-import { MOCK_USER_PROFILE } from '../data/userProfile';
+import type { UserProfile } from '../data/userProfile';
 import {
   calculateAllMatches,
   matchBadgeClasses,
@@ -25,6 +25,7 @@ import {
 } from '../data/matching';
 
 interface JobRecommendationsProps {
+  profile: UserProfile;
   onBack: () => void;
   onSeeAllVacancies: () => void;
 }
@@ -56,6 +57,7 @@ const BUCKET_META: Record<
 };
 
 export function JobRecommendations({
+  profile,
   onBack,
   onSeeAllVacancies,
 }: JobRecommendationsProps) {
@@ -65,11 +67,11 @@ export function JobRecommendations({
   const [onlyPreferredMode, setOnlyPreferredMode] = useState(false);
 
   const recommendations = useMemo(() => {
-    const all = calculateAllMatches(MOCK_USER_PROFILE, VACANCIES);
+    const all = calculateAllMatches(profile, VACANCIES);
     let list = all.filter((m) => m.score >= 55);
     if (onlyPreferredMode) {
       list = list.filter((m) =>
-        MOCK_USER_PROFILE.preferredModalidades.includes(m.vacancy.modalidad),
+        profile.preferredModalidades.includes(m.vacancy.modalidad),
       );
     }
     if (sortMode === 'salary') {
@@ -79,7 +81,7 @@ export function JobRecommendations({
       );
     }
     return list;
-  }, [sortMode, onlyPreferredMode]);
+  }, [profile, sortMode, onlyPreferredMode]);
 
   const grouped = useMemo(() => {
     const buckets: Record<'excellent' | 'good' | 'fair', MatchResult[]> = {
@@ -153,7 +155,7 @@ export function JobRecommendations({
             className="text-gray-900 mb-2"
             style={{ fontSize: '28px', fontWeight: 700 }}
           >
-            Vacantes pensadas para ti, {MOCK_USER_PROFILE.name.split(' ')[0]}
+            Vacantes pensadas para ti, {profile.name.split(' ')[0]}
           </h1>
           <p className="text-gray-600">
             Seleccionadas según tu perfil, tu experiencia y tus preferencias de modalidad y ubicación.
@@ -232,7 +234,7 @@ export function JobRecommendations({
               className="w-4 h-4"
             />
             <span className="text-gray-700 text-sm">
-              Solo {MOCK_USER_PROFILE.preferredModalidades.join(' / ')}
+              Solo {profile.preferredModalidades.join(' / ')}
             </span>
           </label>
           <button

@@ -161,6 +161,33 @@ def _extract_education_items(section_text: str) -> List[Dict[str, str]]:
         })
     return items
 
+def extract_name_from_cv(text: str) -> str:
+    """
+    Extrae el nombre de la persona del CV.
+    Asume que el nombre está en las primeras líneas no vacías del documento.
+    """
+    lines = [line.strip() for line in text.split('\n') if line.strip()]
+    
+    if not lines:
+        return "Candidato"
+    
+    # El nombre usualmente es la primera línea no vacía que no sea un header
+    # Excluimos líneas que son muy largas (resumen) o contienen caracteres especiales
+    for line in lines[:5]:  # Revisar las primeras 5 líneas
+        # Ignorar líneas que parecen ser headers o descripciones
+        if len(line) > 80 or line.lower().startswith(('email:', 'teléfono', 'tel:', 'linkedin:', 'https://', '+')):
+            continue
+        
+        # Ignorar palabras clave de secciones
+        if any(header in line.lower() for header in EXPERIENCE_HEADERS + EDUCATION_HEADERS):
+            continue
+        
+        # Si es una línea corta, probablemente es el nombre
+        if len(line) <= 60:
+            return line
+    
+    return "Candidato"
+
 def extract_experience_and_education(text: str):
     experience_section = _extract_section(text, EXPERIENCE_HEADERS)
     education_section = _extract_section(text, EDUCATION_HEADERS)

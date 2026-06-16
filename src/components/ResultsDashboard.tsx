@@ -19,7 +19,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { VACANCIES, formatSalary } from '../data/vacancies';
-import { MOCK_USER_PROFILE } from '../data/userProfile';
+import type { UserProfile } from '../data/userProfile';
 import {
   calculateAllMatches,
   calculateProfileScore,
@@ -29,6 +29,7 @@ import {
 import { recommendCoursesForGaps } from '../data/courses';
 
 interface ResultsDashboardProps {
+  profile: UserProfile;
   onBack: () => void;
   onSeeRecommendations: () => void;
   onSeeAllVacancies: () => void;
@@ -52,6 +53,7 @@ function profileScoreLabel(total: number): string {
 }
 
 export function ResultsDashboard({
+  profile,
   onBack,
   onSeeRecommendations,
   onSeeAllVacancies,
@@ -60,12 +62,12 @@ export function ResultsDashboard({
   onSeeCourses,
 }: ResultsDashboardProps) {
   const matches = useMemo(
-    () => calculateAllMatches(MOCK_USER_PROFILE, VACANCIES),
-    [],
+    () => calculateAllMatches(profile, VACANCIES),
+    [profile],
   );
   const profileScore = useMemo(
-    () => calculateProfileScore(MOCK_USER_PROFILE, matches),
-    [matches],
+    () => calculateProfileScore(profile, matches),
+    [profile, matches],
   );
   const topVacancies = matches.slice(0, 3);
   const compatibleCount = matches.filter((m) => m.score >= 60).length;
@@ -80,8 +82,8 @@ export function ResultsDashboard({
     }));
     return recommendCoursesForGaps(gaps).slice(0, 3);
   }, [matches]);
-  const detectedTechnicalSkills = MOCK_USER_PROFILE.technicalSkills.slice(0, 10);
-  const detectedSoftSkills = MOCK_USER_PROFILE.softSkills.slice(0, 6);
+  const detectedTechnicalSkills = profile.technicalSkills.slice(0, 10);
+  const detectedSoftSkills = profile.softSkills.slice(0, 6);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -127,7 +129,7 @@ export function ResultsDashboard({
             Tu Dashboard de Resultados
           </h1>
           <p className="text-gray-600">
-            Hola {MOCK_USER_PROFILE.name.split(' ')[0]} · Aquí tienes la radiografía completa de tu perfil profesional.
+            Hola {profile.name.split(' ')[0]} · Aquí tienes la radiografía completa de tu perfil profesional.
           </p>
         </div>
 

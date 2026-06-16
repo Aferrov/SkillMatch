@@ -99,6 +99,9 @@ export function CVAnalysisReview({ analysisResult, onContinue, onBack }: CVAnaly
     experience.length +
     education.length;
 
+  const missingSkillsToShow = interests.slice(0, 8);
+  const hiddenMissingSkillCount = Math.max(0, interests.length - missingSkillsToShow.length);
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -351,10 +354,15 @@ export function CVAnalysisReview({ analysisResult, onContinue, onBack }: CVAnaly
           subtitle="Competencias esperadas para tu carrera"
         >
           <ChipList
-            chips={interests.length > 0 ? interests : ['No se detectaron habilidades faltantes']}
+            chips={missingSkillsToShow.length > 0 ? missingSkillsToShow : ['No se detectaron habilidades faltantes']}
             chipColor="purple"
             onRemove={(v) => removeChip(interests, setInterests, v)}
           />
+          {hiddenMissingSkillCount > 0 && (
+            <p className="text-gray-500 text-xs mt-2">
+              Mostrando {missingSkillsToShow.length} de {interests.length} carencias. Ajusta las que más te interesen.
+            </p>
+          )}
           <AddChipInput
             value={interestInput}
             onChange={setInterestInput}

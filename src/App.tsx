@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Home } from './components/Home';
 import { UploadCV } from './components/UploadCV';
 import { AnalysisProcess } from './components/AnalysisProcess';
@@ -10,6 +10,7 @@ import { SkillGapAnalysis } from './components/SkillGapAnalysis';
 import { CourseRecommendations } from './components/CourseRecommendations';
 import { ProfilePage } from './components/ProfilePage';
 import { UserDashboard } from './components/UserDashboard';
+import { MOCK_USER_PROFILE, type UserProfile } from './data/userProfile';
 
 type Screen =
   | 'home'
@@ -29,6 +30,7 @@ type Screen =
   | 'dashboard';
 
 interface AnalysisResult {
+  name?: string;
   career?: string;
   career_scores?: Record<string, number>;
   match?: unknown;
@@ -40,6 +42,21 @@ interface AnalysisResult {
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('home');
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
+
+  const analysisProfile = useMemo<UserProfile>(() => {
+    if (!analysisResult) return MOCK_USER_PROFILE;
+
+    return {
+      ...MOCK_USER_PROFILE,
+      name: analysisResult.name || MOCK_USER_PROFILE.name,
+      headline: analysisResult.career
+        ? `${analysisResult.career} detectada`
+        : MOCK_USER_PROFILE.headline,
+      technicalSkills: analysisResult.found_skills ?? [],
+      softSkills: [],
+      interests: analysisResult.missing_skills ?? [],
+    };
+  }, [analysisResult]);
 
   return (
     <div>
@@ -88,6 +105,7 @@ export default function App() {
 
       {currentScreen === 'results' && (
         <ResultsDashboard
+          profile={analysisProfile}
           onBack={() => setCurrentScreen('cvReview')}
           onSeeRecommendations={() => setCurrentScreen('recommendations')}
           onSeeAllVacancies={() => setCurrentScreen('vacancies')}
@@ -106,7 +124,10 @@ export default function App() {
       )}
 
       {currentScreen === 'courses' && (
-        <CourseRecommendations onBack={() => setCurrentScreen('results')} />
+        <CourseRecommendations
+          profile={analysisProfile}
+          onBack={() => setCurrentScreen('results')}
+        />
       )}
 
       {currentScreen === 'profile' && (
@@ -115,6 +136,7 @@ export default function App() {
 
       {currentScreen === 'recommendations' && (
         <JobRecommendations
+          profile={analysisProfile}
           onBack={() => setCurrentScreen('results')}
           onSeeAllVacancies={() => setCurrentScreen('vacancies')}
         />
