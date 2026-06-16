@@ -11,9 +11,10 @@ import {
   CheckCircle2,
   Loader2,
 } from 'lucide-react';
+import { analyzeCV } from '../services/api';
 
 interface UploadCVProps {
-  onUpload: () => void;
+  onUpload: (data?: any) => void;
   onBack: () => void;
   onManualEntry: () => void;
 }
@@ -30,6 +31,7 @@ export function UploadCV({ onUpload, onBack, onManualEntry }: UploadCVProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [fileError, setFileError] = useState('');
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const [linkedinUrl, setLinkedinUrl] = useState('');
   const [linkedinStatus, setLinkedinStatus] = useState<
@@ -82,10 +84,22 @@ export function UploadCV({ onUpload, onBack, onManualEntry }: UploadCVProps) {
     setSelectedFile(file);
   };
 
-  const handleUpload = () => {
-    if (selectedFile) {
-      onUpload();
+  const handleUpload = async () => {
+    if (!selectedFile) return;
+    
+    setIsAnalyzing(true);
+    setFileError('');
+    
+    const result = await analyzeCV(selectedFile);
+    
+    if (!result.success) {
+      setFileError(result.error || 'Error al analizar el CV');
+      setIsAnalyzing(false);
+      return;
     }
+    
+    // Si el análisis es exitoso, pasar los datos al componente padre
+    onUpload(result.data);
   };
 
   const handleLinkedinConnect = () => {
@@ -271,14 +285,21 @@ export function UploadCV({ onUpload, onBack, onManualEntry }: UploadCVProps) {
 
             <button
               onClick={handleUpload}
-              disabled={!selectedFile}
-              className={`w-full py-3 rounded-lg transition-colors mt-6 ${
-                selectedFile
+              disabled={!selectedFile || isAnalyzing}
+              className={`w-full py-3 rounded-lg transition-colors mt-6 flex items-center justify-center gap-2 ${
+                selectedFile && !isAnalyzing
                   ? 'bg-blue-600 text-white hover:bg-blue-700'
                   : 'bg-gray-200 text-gray-400 cursor-not-allowed'
               }`}
             >
-              Analizar mi CV
+              {isAnalyzing ? (
+                <>
+                  <Loader2 size={18} className="animate-spin" />
+                  Analizando...
+                </>
+              ) : (
+                'Analizar mi CV'
+              )}
             </button>
           </div>
 

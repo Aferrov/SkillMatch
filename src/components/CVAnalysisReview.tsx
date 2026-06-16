@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   CheckCircle2,
   Wrench,
@@ -16,6 +16,14 @@ import {
 } from 'lucide-react';
 
 interface CVAnalysisReviewProps {
+  analysisResult: {
+    career?: string;
+    found_skills?: string[];
+    missing_skills?: string[];
+    experience?: ExperienceItem[];
+    education?: EducationItem[];
+    jobs?: unknown[];
+  } | null;
   onContinue: () => void;
   onBack: () => void;
 }
@@ -36,92 +44,25 @@ interface EducationItem {
   kind: 'studies' | 'certificate';
 }
 
-// Simulación del resultado del modelo NLP sobre el CV cargado.
-const INITIAL_TECH_SKILLS = [
-  'Microsoft Project',
-  'JIRA',
-  'Confluence',
-  'Excel Avanzado',
-  'Notion',
-  'Power BI',
-  'Trello',
-];
+export function CVAnalysisReview({ analysisResult, onContinue, onBack }: CVAnalysisReviewProps) {
+  const apiTechSkills = analysisResult?.found_skills ?? [];
+  const apiMissingSkills = analysisResult?.missing_skills ?? [];
+  const apiExperience = analysisResult?.experience ?? [];
+  const apiEducation = analysisResult?.education ?? [];
+  const apiCareer = analysisResult?.career ?? 'Perfil profesional';
 
-const INITIAL_SOFT_SKILLS = [
-  'Liderazgo',
-  'Comunicación efectiva',
-  'Trabajo en equipo',
-  'Pensamiento analítico',
-  'Negociación',
-  'Adaptabilidad',
-];
+  const [techSkills, setTechSkills] = useState<string[]>(apiTechSkills);
+  const [softSkills, setSoftSkills] = useState<string[]>([]);
+  const [interests, setInterests] = useState<string[]>(apiMissingSkills);
+  const [experience, setExperience] = useState<ExperienceItem[]>(apiExperience);
+  const [education, setEducation] = useState<EducationItem[]>(apiEducation);
 
-const INITIAL_INTERESTS = [
-  'Gestión de Proyectos TI',
-  'Innovación empresarial',
-  'Consultoría',
-  'Operaciones',
-];
-
-const INITIAL_EXPERIENCE: ExperienceItem[] = [
-  {
-    id: 'exp1',
-    role: 'Coordinadora de Proyectos',
-    company: 'Cervecería Backus',
-    period: '2022 – Presente · Arequipa',
-    description:
-      'Gestión de 3 equipos multidisciplinarios y seguimiento de proyectos comerciales.',
-  },
-  {
-    id: 'exp2',
-    role: 'Analista Junior de Proyectos',
-    company: 'Yura S.A.',
-    period: '2020 – 2022 · Arequipa',
-    description:
-      'Soporte en planificación y reportes de proyectos de infraestructura cementera.',
-  },
-  {
-    id: 'exp3',
-    role: 'Practicante de Gestión',
-    company: 'Caja Arequipa',
-    period: '2019 – 2020 · Arequipa',
-    description:
-      'Apoyo en seguimiento de KPIs y elaboración de presentaciones ejecutivas.',
-  },
-];
-
-const INITIAL_EDUCATION: EducationItem[] = [
-  {
-    id: 'edu1',
-    title: 'Ingeniería Industrial',
-    institution: 'Universidad Nacional de San Agustín (UNSA)',
-    period: '2014 – 2019',
-    kind: 'studies',
-  },
-  {
-    id: 'edu2',
-    title: 'Diplomado en Gestión de Proyectos',
-    institution: 'ESAN',
-    period: '2022',
-    kind: 'certificate',
-  },
-  {
-    id: 'edu3',
-    title: 'Certificación PMI-ACP (en curso)',
-    institution: 'PMI',
-    period: '2024',
-    kind: 'certificate',
-  },
-];
-
-export function CVAnalysisReview({ onContinue, onBack }: CVAnalysisReviewProps) {
-  const [techSkills, setTechSkills] = useState<string[]>(INITIAL_TECH_SKILLS);
-  const [softSkills, setSoftSkills] = useState<string[]>(INITIAL_SOFT_SKILLS);
-  const [interests, setInterests] = useState<string[]>(INITIAL_INTERESTS);
-  const [experience, setExperience] = useState<ExperienceItem[]>(
-    INITIAL_EXPERIENCE
-  );
-  const [education, setEducation] = useState<EducationItem[]>(INITIAL_EDUCATION);
+  useEffect(() => {
+    setTechSkills(apiTechSkills);
+    setInterests(apiMissingSkills);
+    setExperience(apiExperience);
+    setEducation(apiEducation);
+  }, [apiTechSkills, apiMissingSkills, apiExperience, apiEducation]);
 
   const [techInput, setTechInput] = useState('');
   const [softInput, setSoftInput] = useState('');
@@ -190,6 +131,9 @@ export function CVAnalysisReview({ onContinue, onBack }: CVAnalysisReviewProps) 
           >
             Esto es lo que encontramos en tu CV
           </h1>
+          <p className="text-blue-700 font-semibold mb-4">
+            Carrera detectada: {apiCareer}
+          </p>
           <p className="text-gray-600">
             Revisa la información extraída y ajusta lo que necesites antes de
             recibir tus recomendaciones.
@@ -272,40 +216,48 @@ export function CVAnalysisReview({ onContinue, onBack }: CVAnalysisReviewProps) 
           title="Experiencia laboral"
           subtitle="Puestos, prácticas y proyectos"
         >
-          <div className="space-y-3">
-            {experience.length === 0 && (
-              <p className="text-gray-500 text-sm">No hay experiencias.</p>
-            )}
-            {experience.map((exp) => (
-              <div
-                key={exp.id}
-                className="bg-gray-50 rounded-lg p-4 border border-gray-100 flex items-start gap-3"
-              >
-                <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Building2 className="text-purple-600" size={20} />
-                </div>
-                <div className="flex-1">
-                  <p className="text-gray-900">{exp.role}</p>
-                  <p className="text-gray-700 text-sm">{exp.company}</p>
-                  <p className="text-gray-500 text-sm flex items-center gap-1 mt-1">
-                    <Calendar size={14} />
-                    {exp.period}
-                  </p>
-                  <p className="text-gray-600 text-sm mt-2">{exp.description}</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setExperience(experience.filter((e) => e.id !== exp.id))
-                  }
-                  className="text-gray-400 hover:text-gray-900 flex-shrink-0"
-                  aria-label={`Quitar ${exp.role}`}
+          {experience.length === 0 ? (
+            <div className="rounded-xl bg-gray-50 border border-gray-200 p-6 text-center">
+              <p className="text-gray-700 text-sm mb-2">
+                Aún no se ha extraído experiencia real del CV.
+              </p>
+              <p className="text-gray-500 text-xs">
+                El analizador actual detecta habilidades, pero no extrae detalles de experiencias y estudios.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {experience.map((exp) => (
+                <div
+                  key={exp.id}
+                  className="bg-gray-50 rounded-lg p-4 border border-gray-100 flex items-start gap-3"
                 >
-                  <X size={18} />
-                </button>
-              </div>
-            ))}
-          </div>
+                  <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Building2 className="text-purple-600" size={20} />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-gray-900">{exp.role}</p>
+                    <p className="text-gray-700 text-sm">{exp.company}</p>
+                    <p className="text-gray-500 text-sm flex items-center gap-1 mt-1">
+                      <Calendar size={14} />
+                      {exp.period}
+                    </p>
+                    <p className="text-gray-600 text-sm mt-2">{exp.description}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setExperience(experience.filter((e) => e.id !== exp.id))
+                    }
+                    className="text-gray-400 hover:text-gray-900 flex-shrink-0"
+                    aria-label={`Quitar ${exp.role}`}
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </Section>
 
         {/* Educación */}
@@ -315,50 +267,58 @@ export function CVAnalysisReview({ onContinue, onBack }: CVAnalysisReviewProps) 
           title="Educación y certificaciones"
           subtitle="Carrera, cursos y certificaciones"
         >
-          <div className="space-y-3">
-            {education.length === 0 && (
-              <p className="text-gray-500 text-sm">No hay estudios registrados.</p>
-            )}
-            {education.map((edu) => (
-              <div
-                key={edu.id}
-                className="bg-gray-50 rounded-lg p-4 border border-gray-100 flex items-start gap-3"
-              >
-                <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center flex-shrink-0">
-                  <GraduationCap className="text-green-600" size={20} />
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <p className="text-gray-900">{edu.title}</p>
-                    <span
-                      className={`text-xs px-2 py-1 rounded-full ${
-                        edu.kind === 'studies'
-                          ? 'bg-blue-100 text-blue-700'
-                          : 'bg-orange-100 text-orange-700'
-                      }`}
-                    >
-                      {edu.kind === 'studies' ? 'Estudios' : 'Certificación'}
-                    </span>
-                  </div>
-                  <p className="text-gray-700 text-sm">{edu.institution}</p>
-                  <p className="text-gray-500 text-sm flex items-center gap-1 mt-1">
-                    <Calendar size={14} />
-                    {edu.period}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setEducation(education.filter((e) => e.id !== edu.id))
-                  }
-                  className="text-gray-400 hover:text-gray-900 flex-shrink-0"
-                  aria-label={`Quitar ${edu.title}`}
+          {education.length === 0 ? (
+            <div className="rounded-xl bg-gray-50 border border-gray-200 p-6 text-center">
+              <p className="text-gray-700 text-sm mb-2">
+                Aún no se han extraído estudios reales del CV.
+              </p>
+              <p className="text-gray-500 text-xs">
+                Esta sección solo mostrará datos reales cuando el backend los extraiga del contenido del PDF.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {education.map((edu) => (
+                <div
+                  key={edu.id}
+                  className="bg-gray-50 rounded-lg p-4 border border-gray-100 flex items-start gap-3"
                 >
-                  <X size={18} />
-                </button>
-              </div>
-            ))}
-          </div>
+                  <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center flex-shrink-0">
+                    <GraduationCap className="text-green-600" size={20} />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="text-gray-900">{edu.title}</p>
+                      <span
+                        className={`text-xs px-2 py-1 rounded-full ${
+                          edu.kind === 'studies'
+                            ? 'bg-blue-100 text-blue-700'
+                            : 'bg-orange-100 text-orange-700'
+                        }`}
+                      >
+                        {edu.kind === 'studies' ? 'Estudios' : 'Certificación'}
+                      </span>
+                    </div>
+                    <p className="text-gray-700 text-sm">{edu.institution}</p>
+                    <p className="text-gray-500 text-sm flex items-center gap-1 mt-1">
+                      <Calendar size={14} />
+                      {edu.period}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setEducation(education.filter((e) => e.id !== edu.id))
+                    }
+                    className="text-gray-400 hover:text-gray-900 flex-shrink-0"
+                    aria-label={`Quitar ${edu.title}`}
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </Section>
 
         {/* Soft skills */}
@@ -383,15 +343,15 @@ export function CVAnalysisReview({ onContinue, onBack }: CVAnalysisReviewProps) 
           />
         </Section>
 
-        {/* Áreas de interés */}
+        {/* Habilidades faltantes */}
         <Section
           icon={TargetIcon}
           color="purple"
-          title="Áreas de interés"
-          subtitle="Rubros y perfiles laborales relacionados"
+          title="Habilidades faltantes"
+          subtitle="Competencias esperadas para tu carrera"
         >
           <ChipList
-            chips={interests}
+            chips={interests.length > 0 ? interests : ['No se detectaron habilidades faltantes']}
             chipColor="purple"
             onRemove={(v) => removeChip(interests, setInterests, v)}
           />
@@ -403,7 +363,7 @@ export function CVAnalysisReview({ onContinue, onBack }: CVAnalysisReviewProps) 
                 setInterestInput('')
               )
             }
-            placeholder="Ej: Banca, Educación, Tecnología..."
+            placeholder="Añade otras habilidades o ideas de mejora"
           />
         </Section>
 

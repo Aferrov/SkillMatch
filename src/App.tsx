@@ -1,10 +1,6 @@
 import { useState } from 'react';
 import { Home } from './components/Home';
-import { Login } from './components/Login';
-import { RegisterPricing } from './components/RegisterPricing';
 import { UploadCV } from './components/UploadCV';
-import { ManualProfile } from './components/ManualProfile';
-import { PreferencesForm } from './components/PreferencesForm';
 import { AnalysisProcess } from './components/AnalysisProcess';
 import { CVAnalysisReview } from './components/CVAnalysisReview';
 import { ResultsDashboard } from './components/ResultsDashboard';
@@ -32,35 +28,32 @@ type Screen =
   | 'profile'
   | 'dashboard';
 
+interface AnalysisResult {
+  career?: string;
+  career_scores?: Record<string, number>;
+  match?: unknown;
+  found_skills?: string[];
+  missing_skills?: string[];
+  jobs?: unknown[];
+}
+
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('home');
+  const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
 
   return (
     <div>
       {currentScreen === 'home' && (
-        <Home onNavigate={(screen) => setCurrentScreen(screen)} />
-      )}
-
-      {currentScreen === 'login' && (
-        <Login
-          onLogin={() => setCurrentScreen('dashboard')}
-          onBack={() => setCurrentScreen('home')}
-          onGoToRegister={() => setCurrentScreen('register')}
-        />
-      )}
-
-      {currentScreen === 'register' && (
-        <RegisterPricing
-          onContinue={() => setCurrentScreen('upload')}
-          onBack={() => setCurrentScreen('home')}
-          onGoToLogin={() => setCurrentScreen('login')}
-        />
+        <Home onNavigate={() => setCurrentScreen('upload')} />
       )}
 
       {currentScreen === 'upload' && (
         <UploadCV
-          onUpload={() => setCurrentScreen('preferences')}
-          onBack={() => setCurrentScreen('register')}
+          onUpload={(data) => {
+            setAnalysisResult(data);
+            setCurrentScreen('analyzing');
+          }}
+          onBack={() => setCurrentScreen('home')}
           onManualEntry={() => setCurrentScreen('manualProfile')}
         />
       )}
@@ -72,12 +65,14 @@ export default function App() {
         />
       )}
 
+      {/*
       {currentScreen === 'preferences' && (
         <PreferencesForm
           onComplete={() => setCurrentScreen('analyzing')}
           onBack={() => setCurrentScreen('upload')}
         />
       )}
+      */}
 
       {currentScreen === 'analyzing' && (
         <AnalysisProcess onComplete={() => setCurrentScreen('cvReview')} />
@@ -85,6 +80,7 @@ export default function App() {
 
       {currentScreen === 'cvReview' && (
         <CVAnalysisReview
+          analysisResult={analysisResult}
           onContinue={() => setCurrentScreen('results')}
           onBack={() => setCurrentScreen('analyzing')}
         />
