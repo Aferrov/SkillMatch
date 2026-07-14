@@ -36,6 +36,20 @@ interface AnalysisResult {
   match?: unknown;
   found_skills?: string[];
   missing_skills?: string[];
+  experience?: Array<{
+    id: string;
+    role: string;
+    company: string;
+    period: string;
+    description: string;
+  }>;
+  education?: Array<{
+    id: string;
+    title: string;
+    institution: string;
+    period: string;
+    kind: string;
+  }>;
   jobs?: unknown[];
 }
 

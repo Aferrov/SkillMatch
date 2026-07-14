@@ -118,6 +118,7 @@ export function UploadCV({ onUpload, onBack, onManualEntry }: UploadCVProps) {
     setLinkedinStatus('connecting');
 
     const result = await analyzeLinkedIn(url);
+    console.log('LinkedIn API result:', result);
 
     if (!result.success) {
       setLinkedinStatus('error');
@@ -126,6 +127,7 @@ export function UploadCV({ onUpload, onBack, onManualEntry }: UploadCVProps) {
     }
 
     // Pasar los datos reales al componente padre
+    setLinkedinStatus('idle');
     onUpload(result.data);
   };
 
