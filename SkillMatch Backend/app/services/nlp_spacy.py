@@ -4,7 +4,20 @@ from app.services.market_data import get_all_careers, get_jobs_by_career, expand
 nlp = spacy.load("es_core_news_md")
 
 def detect_career_spacy(text: str):
-    """Detecta carrera con carreras normalizadas y sinónimos"""
+    """Detecta carrera con un paso explícito cuando el CV menciona la especialidad."""
+    from app.services.market_data import detect_career_from_text
+
+    # 1) Preferir menciones explícitas de la profesión/educación
+    explicit = detect_career_from_text(text)
+    if explicit != "Otros":
+        MARKET_SKILLS = get_all_careers()
+        scores = {career: 0 for career in MARKET_SKILLS}
+        text_expanded = expand_skills_with_synonyms(text)
+        for career, skills in MARKET_SKILLS.items():
+            scores[career] = sum(1 for skill in skills if skill in text_expanded)
+        return explicit, scores
+
+    # 2) Si no se detecta explícitamente, usar la lógica original basada en skills
     MARKET_SKILLS = get_all_careers()
     text_expanded = expand_skills_with_synonyms(text)
     scores = {}

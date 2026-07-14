@@ -14,7 +14,7 @@ engine = create_engine(db_url)
 
 # Mapeo de palabras clave del título → carrera real
 CAREER_MAPPING = {
-    "Tecnología": ["software", "developer", "engineer", "backend", "frontend", "fullstack",
+    "Tecnología": ["software", "developer", "backend", "frontend", "fullstack",
                    "devops", "programmer", "data", "analytics", "machine learning", "ai",
                    "cloud", "architect", "python", "java", "react", "node", "fastapi"],
     "Ciberseguridad": ["cybersecurity", "cyber", "security", "soc", "pentesting",
@@ -22,13 +22,17 @@ CAREER_MAPPING = {
     "Marketing": ["marketing", "content", "social media", "seo", "branding",
                   "digital", "growth", "community", "publicidad"],
     "Administración": ["administrator", "business", "operations", "sales",
-                       "hr", "human resources", "administrative", "gestor"],
+                       "hr", "human resources", "administrative", "gestor",
+                       "administración", "administrador", "administrativa", "administrativo"],
     "Contabilidad": ["accountant", "contable", "finanzas", "finance",
                      "contador", "bookkeeper", "tesorería"],
     "Salud": ["nurse", "doctor", "médico", "enfermera", "pharmacist",
               "psicólogo", "psychologist", "ocupacional", "health"],
-    "Ingeniería": ["civil", "mechanical", "electrical", "industrial",
-                   "ingeniero", "engineer"],
+    "Ingeniería Civil": ["ingeniero civil", "ingeniería civil", "civil", "obra civil", "construcción civil", "estructural"],
+    "Ingeniería Industrial": ["ingeniero industrial", "ingeniería industrial", "industrial", "manufactura", "procesos"],
+    "Ingeniería Eléctrica": ["ingeniero eléctrico", "ingeniería eléctrica", "eléctrico", "eléctrica", "energía"],
+    "Ingeniería Mecánica": ["ingeniero mecánico", "ingeniería mecánica", "mecánico", "mecánica", "automotriz"],
+    "Ingeniería": ["ingeniero", "engineer"],
     "Educación": ["teacher", "professor", "docente", "instructor",
                   "tutor", "educador", "k-12"],
     "Diseño": ["designer", "graphic", "ux", "ui", "diseñador",
@@ -67,6 +71,77 @@ def normalize_title_to_career(title: str) -> str:
         if any(kw in title_lower for kw in keywords):
             return career
     return "Otros"
+
+def detect_career_from_text(text: str) -> str:
+    """Detecta la carrera a partir de menciones explícitas en el texto."""
+    text_lower = text.lower()
+
+    explicit_patterns = {
+        "Ingeniería Civil": [
+            "ingeniería civil",
+            "ingeniero civil",
+            "obra civil",
+            "construcción civil",
+            "estructural",
+        ],
+        "Ingeniería Industrial": [
+            "ingeniería industrial",
+            "ingeniero industrial",
+            "manufactura",
+            "procesos industriales",
+        ],
+        "Ingeniería Eléctrica": [
+            "ingeniería eléctrica",
+            "ingeniero eléctrico",
+            "eléctrico",
+            "energía eléctrica",
+        ],
+        "Ingeniería Mecánica": [
+            "ingeniería mecánica",
+            "ingeniero mecánico",
+            "mecánica",
+            "automotriz",
+        ],
+        "Administración": [
+            "administración",
+            "administrador",
+            "administradora",
+            "gestión empresarial",
+            "gestión de empresas",
+            "administración de empresas",
+            "administrativo",
+            "administrativa",
+        ],
+        "Tecnología": [
+            "ingeniero de software",
+            "desarrollador",
+            "programador",
+            "data scientist",
+            "científico de datos",
+            "machine learning",
+            "python",
+            "java",
+            "javascript",
+            "devops",
+            "cloud",
+        ],
+    }
+
+    for career, patterns in explicit_patterns.items():
+        for pattern in patterns:
+            if pattern in text_lower:
+                return career
+
+    scores = {career: 0 for career in CAREER_MAPPING}
+    for career, keywords in CAREER_MAPPING.items():
+        for kw in keywords:
+            if kw in text_lower:
+                scores[career] += 1
+
+    scores_filtered = {k: v for k, v in scores.items() if v > 0}
+    if not scores_filtered:
+        return "Otros"
+    return max(scores_filtered, key=scores_filtered.get)
 
 def get_all_careers() -> dict:
     """Construye MARKET_SKILLS dinámicamente con carreras normalizadas"""
