@@ -11,7 +11,7 @@ import {
   CheckCircle2,
   Loader2,
 } from 'lucide-react';
-import { analyzeCV } from '../services/api';
+import { analyzeCV, analyzeLinkedIn } from '../services/api';
 
 interface UploadCVProps {
   onUpload: (data?: any) => void;
@@ -102,7 +102,7 @@ export function UploadCV({ onUpload, onBack, onManualEntry }: UploadCVProps) {
     onUpload(result.data);
   };
 
-  const handleLinkedinConnect = () => {
+  const handleLinkedinConnect = async () => {
     const url = linkedinUrl.trim();
     if (!url) {
       setLinkedinError('Ingresa la URL de tu perfil de LinkedIn.');
@@ -116,10 +116,17 @@ export function UploadCV({ onUpload, onBack, onManualEntry }: UploadCVProps) {
     }
     setLinkedinError('');
     setLinkedinStatus('connecting');
-    // Simulación de OAuth / scraping de perfil
-    setTimeout(() => {
-      onUpload();
-    }, 1500);
+
+    const result = await analyzeLinkedIn(url);
+
+    if (!result.success) {
+      setLinkedinStatus('error');
+      setLinkedinError(result.error || 'Error al analizar el perfil de LinkedIn.');
+      return;
+    }
+
+    // Pasar los datos reales al componente padre
+    onUpload(result.data);
   };
 
   return (

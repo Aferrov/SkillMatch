@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routes import cv
+from app.routes import linkedin
 
 app = FastAPI(title="SkillMatch API")
 
@@ -15,13 +16,9 @@ app.add_middleware(
 
 # Rutas
 app.include_router(cv.router, prefix="/api/cv", tags=["CV Analysis"])
+app.include_router(linkedin.router, prefix="/api/linkedin", tags=["LinkedIn Analysis"])
 
 
 @app.get("/")
 def root():
     return {"message": "SkillMatch API funcionando 🚀"}
-
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
