@@ -11,7 +11,13 @@ import {
 } from 'lucide-react';
 
 interface RegisterPricingProps {
-  onContinue: () => void;
+  /** Crea la cuenta en el backend. Devuelve el error a mostrar si falla. */
+  onContinue: (data: {
+    name: string;
+    email: string;
+    password: string;
+    plan: 'Free' | 'Premium';
+  }) => Promise<{ success: boolean; error?: string }>;
   onBack: () => void;
   onGoToLogin: () => void;
 }
@@ -36,13 +42,14 @@ export function RegisterPricing({
     password: false,
   });
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const nameOk = formData.name.trim().length >= 2;
   const emailOk = EMAIL_REGEX.test(formData.email.trim());
   const passwordOk = formData.password.length >= 8;
-  const isValid = nameOk && emailOk && passwordOk && acceptedTerms;
+  const isValid = nameOk && emailOk && passwordOk && acceptedTerms && !isSubmitting;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setTouched({ name: true, email: true, password: true });
 
@@ -64,7 +71,21 @@ export function RegisterPricing({
     }
 
     setError('');
-    onContinue();
+    setIsSubmitting(true);
+
+    const result = await onContinue({
+      name: formData.name.trim(),
+      email: formData.email.trim(),
+      password: formData.password,
+      // El plan anual y el mensual son de pago; ambos crean cuenta Premium
+      plan: 'Premium',
+    });
+
+    // Si el registro funciona, App navega fuera de esta pantalla
+    if (!result.success) {
+      setError(result.error || 'No se pudo crear la cuenta.');
+      setIsSubmitting(false);
+    }
   };
 
   const planLabel =
@@ -491,7 +512,7 @@ export function RegisterPricing({
                       : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                   }`}
                 >
-                  Crear cuenta y continuar
+                  {isSubmitting ? 'Creando tu cuenta...' : 'Crear cuenta y continuar'}
                 </button>
 
                 <p className="text-center text-gray-500 text-sm">

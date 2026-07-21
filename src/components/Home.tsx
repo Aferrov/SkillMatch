@@ -12,10 +12,13 @@ import {
 import { ImageWithFallback } from './figma/ImageWithFallback';
 
 interface HomeProps {
-  onNavigate: (screen: 'upload') => void;
+  onNavigate: (screen: 'upload' | 'login' | 'register' | 'dashboard') => void;
+  /** Cambia la cabecera para un usuario con sesión iniciada. */
+  isAuthenticated?: boolean;
+  userName?: string;
 }
 
-export function Home({ onNavigate }: HomeProps) {
+export function Home({ onNavigate, isAuthenticated = false, userName }: HomeProps) {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -46,12 +49,29 @@ export function Home({ onNavigate }: HomeProps) {
               >
                 Beneficios
               </a>
-              <button
-                onClick={() => onNavigate('upload')}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Iniciar Sesión
-              </button>
+              {isAuthenticated ? (
+                <button
+                  onClick={() => onNavigate('dashboard')}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  {userName ? `Ir a mi panel` : 'Mi panel'}
+                </button>
+              ) : (
+                <>
+                  <button
+                    onClick={() => onNavigate('login')}
+                    className="text-gray-700 hover:text-gray-900"
+                  >
+                    Iniciar Sesión
+                  </button>
+                  <button
+                    onClick={() => onNavigate('register')}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Crear cuenta
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>

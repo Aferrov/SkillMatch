@@ -64,6 +64,50 @@ class CourseSkill(Base):
     skill_name = Column(Text)
 
 
+class User(Base):
+    """Usuario registrado en SkillMatch."""
+    __tablename__ = "users"
+    id            = Column(Integer, primary_key=True)
+    name          = Column(Text, nullable=False)
+    email         = Column(Text, unique=True, nullable=False, index=True)
+    password_hash = Column(Text, nullable=False)   # pbkdf2_sha256$iteraciones$salt$hash
+    plan          = Column(Text, default="Free")   # "Free" | "Premium"
+    created_at    = Column(DateTime, default=datetime.now)
+    last_login_at = Column(DateTime, nullable=True)
+
+
+class UserProfile(Base):
+    """
+    Estado persistido de la sesión de un usuario: último análisis de CV,
+    perfil editado y preferencias. Se guarda como JSON para que el frontend
+    pueda restaurar la sesión tal cual la dejó, incluso en otro dispositivo.
+    """
+    __tablename__ = "user_profiles"
+    id            = Column(Integer, primary_key=True)
+    user_id       = Column(Integer, unique=True, index=True)
+    analysis_json = Column(Text, nullable=True)    # resultado crudo de /api/cv/analyze
+    profile_json  = Column(Text, nullable=True)    # UserProfile editado en el frontend
+    prefs_json    = Column(Text, nullable=True)    # preferencias laborales
+    updated_at    = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+
+
+class AnalysisRun(Base):
+    """
+    Un registro por cada análisis de CV que hace el usuario. Permite mostrar
+    en el panel datos reales (cuántos análisis lleva, cuándo fue el último,
+    cómo evoluciona su puntuación) en vez de cifras fijas.
+    """
+    __tablename__ = "analysis_runs"
+    id             = Column(Integer, primary_key=True)
+    user_id        = Column(Integer, index=True)
+    career         = Column(Text, nullable=True)
+    score          = Column(Integer, nullable=True)
+    skills_found   = Column(Integer, default=0)
+    skills_missing = Column(Integer, default=0)
+    source         = Column(Text, default="cv")   # "cv" | "linkedin" | "manual"
+    created_at     = Column(DateTime, default=datetime.now)
+
+
 class AgentRun(Base):
     """Registro de cada ejecución de un agente."""
     __tablename__ = "agent_runs"
@@ -80,4 +124,4 @@ class AgentRun(Base):
 
 def init_db():
     Base.metadata.create_all(engine)
-    print("✓ Base de datos lista (jobs, courses, agent_runs)")
+    print("✓ Base de datos lista (jobs, courses, agent_runs, users)")

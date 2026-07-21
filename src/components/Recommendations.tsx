@@ -74,7 +74,7 @@ export function Recommendations({ onNavigate, onSeeAllVacancies }: Recommendatio
         <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl p-8 text-white mb-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center">
-              <div className="inline-flex items-center justify-center w-24 h-24 bg-white bg-opacity-20 rounded-full mb-4">
+              <div className="inline-flex items-center justify-center w-24 h-24 bg-white/20 rounded-full mb-4">
                 <span style={{
     color: 'black',
     fontWeight: '500',
@@ -85,7 +85,7 @@ export function Recommendations({ onNavigate, onSeeAllVacancies }: Recommendatio
               <p className="text-blue-100">Match Promedio</p>
             </div>
 <div className="text-center">
-              <div className="inline-flex items-center justify-center w-24 h-24 bg-white bg-opacity-20 rounded-full mb-4">
+              <div className="inline-flex items-center justify-center w-24 h-24 bg-white/20 rounded-full mb-4">
                 <span style={{
     color: 'black',
     fontWeight: '500',
@@ -96,7 +96,7 @@ export function Recommendations({ onNavigate, onSeeAllVacancies }: Recommendatio
               <p className="text-blue-100">Empleos Compatibles</p>
             </div>
                         <div className="text-center">
-              <div className="inline-flex items-center justify-center w-24 h-24 bg-white bg-opacity-20 rounded-full mb-4">
+              <div className="inline-flex items-center justify-center w-24 h-24 bg-white/20 rounded-full mb-4">
                 <span style={{
     color: 'black',
     fontWeight: '500',

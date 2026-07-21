@@ -79,11 +79,73 @@ El archivo `.env` en `SkillMatch Backend/` contiene:
 RAPIDAPI_KEY=...
 GROQ_API_KEY=...
 DATABASE_URL=sqlite:///skillmatch.db
+
+# Opcional: clave para firmar los tokens de sesión.
+# Si no se define, el backend genera una y la guarda en `.auth_secret`
+# (ignorado por git). En producción DEFÍNELA explícitamente.
+AUTH_SECRET_KEY=una-clave-larga-y-aleatoria
 ```
 
 ---
 
+## 🔐 Sesiones y Autenticación
+
+El login es real y no requiere dependencias extra de Python: las contraseñas
+se guardan con **PBKDF2-HMAC-SHA256** (salt único por usuario) y la sesión
+viaja en un **JWT HS256**, todo con la librería estándar.
+
+**Cómo se mantiene la sesión:**
+
+| Dónde | Qué guarda | Cuándo caduca |
+|---|---|---|
+| `localStorage` (con "Recordarme") | token + usuario | 30 días |
+| `sessionStorage` (sin "Recordarme") | token + usuario | al cerrar la pestaña |
+| Tabla `user_profiles` | último análisis, perfil y preferencias | permanente |
+| Tabla `analysis_runs` | historial de análisis (score, brechas, fecha) | permanente |
+
+Al recargar la página, el frontend rehidrata la sesión desde el navegador y
+la revalida contra `/api/auth/me`. Mientras esa comprobación ocurre muestra
+una pantalla de "Restaurando tu sesión...", por lo que **recargar o usar el
+botón atrás ya no devuelve al login**. Si el backend está caído, la sesión
+local se conserva en vez de expulsar al usuario.
+
+Cada pantalla tiene su propia URL (`/login`, `/subir-cv`, `/resultados`,
+`/vacantes`, `/panel`, ...), así que el historial del navegador, los
+marcadores y el botón atrás funcionan de forma nativa.
+
+---
+
 ## 🔌 Endpoints Disponibles
+
+### Autenticación
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| POST | `/api/auth/register` | Crea cuenta y devuelve token |
+| POST | `/api/auth/login` | Inicia sesión (`remember` alarga el token a 30 días) |
+| GET | `/api/auth/me` | Valida el token guardado |
+| POST | `/api/auth/logout` | Cierra sesión |
+| GET | `/api/auth/session` | Recupera el último análisis/perfil guardado |
+| PUT | `/api/auth/session` | Guarda el estado de la sesión |
+| GET | `/api/auth/stats` | Métricas reales: nº de análisis, evolución del score, historial |
+
+Cada `PUT /api/auth/session` que incluya `analysis` deja una entrada en la
+tabla `analysis_runs`. De ahí salen las cifras del panel (análisis realizados,
+"último: hace 2 días", variación de puntuación) y la actividad reciente:
+ninguna está codificada a mano en el frontend.
+
+```bash
+# Registro
+curl -X POST "http://localhost:8000/api/auth/register" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"María González","email":"maria@ejemplo.com","password":"password123"}'
+
+# Uso del token en rutas protegidas
+curl "http://localhost:8000/api/auth/me" -H "Authorization: Bearer <token>"
+```
+
+Las rutas `/api/auth/me` y `/api/auth/session` responden **401** con un token
+ausente, inválido o caducado; el frontend lo interpreta limpiando la sesión.
 
 ### CV Analysis
 
@@ -114,10 +176,25 @@ curl -X POST "http://localhost:8000/api/cv/analyze" \
 ### Frontend
 
 ```bash
-npm run build
+npm run typecheck   # solo verifica tipos
+npm run build       # verifica tipos y compila
 ```
 
-Genera la carpeta `dist/` lista para producción.
+Genera la carpeta `build/` lista para producción.
+
+> `npm run build` ahora ejecuta `tsc --noEmit` antes de compilar. Vite por sí
+> solo elimina los tipos sin comprobarlos, así que errores como un componente
+> usado sin importar pasaban desapercibidos hasta romper en el navegador.
+
+**Importante al desplegar:** la app usa rutas reales (`/resultados`, `/panel`,
+...), así que el servidor debe redirigir cualquier ruta desconocida a
+`index.html`. En Nginx:
+
+```nginx
+location / {
+  try_files $uri $uri/ /index.html;
+}
+```
 
 ### Backend
 
@@ -193,12 +270,18 @@ const handleAnalyzeCV = async (file: File) => {
 ### Frontend
 ```
 src/
-├── components/      # Componentes React
+├── components/               # Componentes React (una pantalla por archivo)
+├── context/
+│   └── AuthContext.tsx       # Estado global de sesión (checking/authenticated/guest)
+├── hooks/
+│   ├── useRouter.ts          # Router sobre la History API (URLs + botón atrás)
+│   └── useAnalysisSession.ts # Análisis de CV persistido y sincronizado
 ├── services/
-│   └── api.ts       # Cliente HTTP (comunicación con backend)
-├── data/            # Datos estáticos
-├── App.tsx          # Componente principal
-└── main.tsx         # Entry point
+│   ├── api.ts                # Cliente HTTP (CV, cursos, agentes)
+│   └── auth.ts               # Login/registro y almacenamiento del token
+├── data/                     # Datos estáticos
+├── App.tsx                   # Rutas, guardas de acceso y flujo entre pantallas
+└── main.tsx                  # Entry point
 ```
 
 ### Backend

@@ -1,22 +1,41 @@
 import { useState } from 'react';
 import { Target, ArrowLeft, Briefcase, MapPin, DollarSign, Clock, GraduationCap, Heart } from 'lucide-react';
 
-interface PreferencesFormProps {
-  onComplete: () => void;
-  onBack: () => void;
+export interface PreferencesData {
+  jobAreas: string[];
+  jobTypes: string[];
+  locations: string[];
+  salaryRange: string;
+  availability: string;
+  workModality: string[];
+  careerGoals: string;
+  additionalSkills: string;
 }
 
-export function PreferencesForm({ onComplete, onBack }: PreferencesFormProps) {
-  const [formData, setFormData] = useState({
-    jobAreas: [] as string[],
-    jobTypes: [] as string[],
-    locations: [] as string[],
-    salaryRange: '',
-    availability: '',
-    workModality: [] as string[],
-    careerGoals: '',
-    additionalSkills: '',
-  });
+interface PreferencesFormProps {
+  onComplete: (prefs: PreferencesData) => void;
+  onBack: () => void;
+  /** Preferencias ya guardadas, para no obligar a rellenarlas otra vez. */
+  initialPrefs?: PreferencesData | null;
+}
+
+export function PreferencesForm({
+  onComplete,
+  onBack,
+  initialPrefs,
+}: PreferencesFormProps) {
+  const [formData, setFormData] = useState<PreferencesData>(
+    initialPrefs ?? {
+      jobAreas: [],
+      jobTypes: [],
+      locations: [],
+      salaryRange: '',
+      availability: '',
+      workModality: [],
+      careerGoals: '',
+      additionalSkills: '',
+    }
+  );
 
   // -------------------------------
   // ÁREAS DE TRABAJO (PERÚ)
@@ -90,7 +109,7 @@ export function PreferencesForm({ onComplete, onBack }: PreferencesFormProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onComplete();
+    onComplete(formData);
   };
 
   const isFormValid = () => {

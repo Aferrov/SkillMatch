@@ -133,7 +133,7 @@ export function SkillGapAnalysis({
             <p className="text-white" style={{ fontSize: '32px', fontWeight: 700 }}>
               {coverage}%
             </p>
-            <div className="bg-white bg-opacity-20 rounded-full h-2 mt-3 overflow-hidden">
+            <div className="bg-white/20 rounded-full h-2 mt-3 overflow-hidden">
               <div
                 className="bg-white h-full"
                 style={{ width: `${coverage}%` }}

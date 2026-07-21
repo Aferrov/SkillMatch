@@ -27,6 +27,8 @@ vite.config.ts.timestamp-*
 
 # --- Variables de entorno ---
 .env
+# Clave de firma de tokens generada automáticamente por el backend
+.auth_secret
 .env.local
 .env.development.local
 .env.test.local

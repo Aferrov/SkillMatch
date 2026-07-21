@@ -3,13 +3,19 @@ import {
   ArrowLeft,
   AlertCircle,
   Lock,
+  Loader2,
   Mail,
   Sparkles,
   ShieldCheck,
 } from 'lucide-react';
 
 interface LoginProps {
-  onLogin: () => void;
+  /** Autentica contra el backend. Devuelve el error a mostrar si falla. */
+  onLogin: (
+    email: string,
+    password: string,
+    remember: boolean
+  ) => Promise<{ success: boolean; error?: string }>;
   onBack: () => void;
   onGoToRegister: () => void;
 }
@@ -19,14 +25,15 @@ const EMAIL_REGEX = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 export function Login({ onLogin, onBack, onGoToRegister }: LoginProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [remember, setRemember] = useState(false);
+  const [remember, setRemember] = useState(true);
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [touched, setTouched] = useState({ email: false, password: false });
 
   const emailInvalid = touched.email && !EMAIL_REGEX.test(email.trim());
   const passwordInvalid = touched.password && password.length > 0 && password.length < 8;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setTouched({ email: true, password: true });
 
@@ -44,7 +51,16 @@ export function Login({ onLogin, onBack, onGoToRegister }: LoginProps) {
     }
 
     setError('');
-    onLogin();
+    setIsSubmitting(true);
+
+    const result = await onLogin(email.trim(), password, remember);
+
+    // Si el login funciona, App navega fuera de esta pantalla; solo hay
+    // que restaurar el botón cuando falla.
+    if (!result.success) {
+      setError(result.error || 'No se pudo iniciar sesión.');
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -80,7 +96,7 @@ export function Login({ onLogin, onBack, onGoToRegister }: LoginProps) {
           {/* Marketing column */}
           <div className="hidden md:block">
             <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl p-8 text-white shadow-2xl">
-              <div className="inline-flex items-center gap-2 bg-white bg-opacity-20 px-3 py-1 rounded-full mb-6">
+              <div className="inline-flex items-center gap-2 bg-white/20 px-3 py-1 rounded-full mb-6">
                 <Sparkles size={16} />
                 <span className="text-sm">Bienvenido de nuevo</span>
               </div>
@@ -99,7 +115,7 @@ export function Login({ onLogin, onBack, onGoToRegister }: LoginProps) {
 
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
                     <Sparkles size={20} />
                   </div>
                   <div>
@@ -111,7 +127,7 @@ export function Login({ onLogin, onBack, onGoToRegister }: LoginProps) {
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
                     <Mail size={20} />
                   </div>
                   <div>
@@ -123,7 +139,7 @@ export function Login({ onLogin, onBack, onGoToRegister }: LoginProps) {
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
                     <ShieldCheck size={20} />
                   </div>
                   <div>
@@ -224,10 +240,24 @@ export function Login({ onLogin, onBack, onGoToRegister }: LoginProps) {
                 {/* Submit */}
                 <button
                   type="submit"
-                  className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                  disabled={isSubmitting}
+                  className={`w-full py-3 rounded-lg transition-colors flex items-center justify-center gap-2 ${
+                    isSubmitting
+                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                      : 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:opacity-90'
+                  }`}
                 >
-                  <Lock size={18} />
-                  Iniciar Sesión
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 size={18} className="animate-spin" />
+                      Verificando...
+                    </>
+                  ) : (
+                    <>
+                      <Lock size={18} />
+                      Iniciar Sesión
+                    </>
+                  )}
                 </button>
 
                 {/* Trust */}

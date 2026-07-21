@@ -13,6 +13,7 @@ import {
   Building2,
   Calendar,
   Edit3,
+  type LucideIcon,
 } from 'lucide-react';
 
 interface CVAnalysisReviewProps {
@@ -410,7 +411,7 @@ export function CVAnalysisReview({ analysisResult, onContinue, onBack }: CVAnaly
 // ---------- Reusable subcomponents ----------
 
 interface SectionProps {
-  icon: React.ComponentType<{ className?: string; size?: number }>;
+  icon: LucideIcon;
   color: 'blue' | 'purple' | 'green' | 'orange';
   title: string;
   subtitle: string;

@@ -144,9 +144,11 @@ export function ResultsDashboard({
                 </span>
                 <span className="text-blue-100">/100</span>
               </div>
-              <div className="inline-flex items-center gap-1 bg-white bg-opacity-20 px-3 py-1 rounded-full mt-3">
+              <div className="inline-flex items-center gap-1 bg-white text-blue-700 px-3 py-1 rounded-full mt-3 ml-6 shadow-sm">
                 <Sparkles size={14} />
-                <span className="text-sm">{profileScoreLabel(profileScore.total)}</span>
+                <span className="text-sm font-medium">
+                  {profileScoreLabel(profileScore.total)}
+                </span>
               </div>
             </div>
             <div className="md:col-span-2 grid grid-cols-2 gap-3">
@@ -156,15 +158,15 @@ export function ResultsDashboard({
                 { label: 'Encaje con mercado', value: profileScore.breakdown.marketFit, max: 50 },
                 { label: 'Cobertura del mercado', value: profileScore.breakdown.compatibilityBreadth, max: 10 },
               ].map((b) => (
-                <div key={b.label} className="bg-white bg-opacity-10 rounded-lg p-4">
-                  <p className="text-blue-100 text-sm mb-1">{b.label}</p>
-                  <p className="text-white">
-                    <span className="font-semibold">{b.value}</span>
-                    <span className="text-blue-100 text-sm"> / {b.max}</span>
+                <div key={b.label} className="bg-white rounded-lg p-4 shadow-sm">
+                  <p className="text-gray-600 text-sm mb-1">{b.label}</p>
+                  <p className="text-gray-900">
+                    <span className="font-semibold text-lg">{b.value}</span>
+                    <span className="text-gray-500 text-sm"> / {b.max}</span>
                   </p>
-                  <div className="bg-white bg-opacity-20 rounded-full h-1 mt-2 overflow-hidden">
+                  <div className="bg-gray-200 rounded-full h-1.5 mt-2 overflow-hidden">
                     <div
-                      className="bg-white h-full"
+                      className="bg-blue-600 h-full rounded-full"
                       style={{ width: `${(b.value / b.max) * 100}%` }}
                     />
                   </div>
@@ -311,33 +313,35 @@ export function ResultsDashboard({
               return (
                 <div
                   key={v.id}
-                  className="border border-gray-200 rounded-lg p-4 hover:border-blue-500 transition-colors"
+                  className="border border-gray-200 rounded-lg p-4 hover:border-blue-500 transition-colors flex flex-col"
                 >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex-1">
-                      <h3 className="text-gray-900 mb-1">{v.title}</h3>
+                  <div className="flex items-start justify-between mb-3 gap-2">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-gray-900 mb-1 line-clamp-2 leading-snug">
+                        {v.title}
+                      </h3>
                       <div className="flex items-center gap-1 text-gray-600 text-sm">
                         <Building2 size={14} />
                         <span>{v.company}</span>
                       </div>
                     </div>
-                    <div className={`text-center px-2 py-1 rounded-lg ${matchBadgeClasses(m.score)}`}>
+                    <div className={`text-center px-2 py-1 rounded-lg flex-shrink-0 ${matchBadgeClasses(m.score)}`}>
                       <div className="font-semibold text-sm">{m.score}%</div>
                     </div>
                   </div>
                   <div className="space-y-1 text-gray-600 text-sm mb-3">
                     <div className="flex items-center gap-1">
-                      <MapPin size={14} />
+                      <MapPin size={14} className="flex-shrink-0" />
                       <span>{v.location} · {v.modalidad}</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <DollarSign size={14} />
+                      <DollarSign size={14} className="flex-shrink-0" />
                       <span>{formatSalary(v.salary)}</span>
                     </div>
                   </div>
                   <button
                     onClick={onSeeRecommendations}
-                    className="w-full py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors text-sm"
+                    className="mt-auto w-full py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors text-sm"
                   >
                     Ver detalles
                   </button>
@@ -380,29 +384,31 @@ export function ResultsDashboard({
                 return (
                   <div
                     key={c.id}
-                    className="border border-gray-200 rounded-lg p-4 hover:border-purple-300 transition-colors"
+                    className="border border-gray-200 rounded-lg p-4 hover:border-purple-300 transition-colors flex flex-col"
                   >
-                    <div className="flex items-start justify-between mb-2">
-                      <h3 className="text-gray-900 flex-1">{c.name}</h3>
+                    <div className="flex items-start justify-between mb-2 gap-2 min-h-[3rem]">
+                      <h3 className="text-gray-900 flex-1 line-clamp-2 leading-snug">
+                        {c.name}
+                      </h3>
                       {c.rating && (
-                        <div className="inline-flex items-center gap-1 text-yellow-500 ml-2">
+                        <div className="flex items-center gap-1 text-yellow-500 flex-shrink-0">
                           <Star size={14} fill="currentColor" />
                           <span className="text-gray-900 text-sm">{c.rating}</span>
                         </div>
                       )}
                     </div>
                     <p className="text-gray-600 text-sm mb-2">{c.platform}</p>
-                    <div className="inline-flex items-center gap-1 px-2 py-1 bg-orange-50 text-orange-700 rounded text-xs mb-3">
-                      <AlertCircle size={12} />
-                      Para cubrir: {c.skill}
+                    <div className="flex items-start gap-1 px-2 py-1 bg-orange-50 text-orange-700 rounded text-xs mb-3 self-start max-w-full">
+                      <AlertCircle size={12} className="flex-shrink-0 mt-0.5" />
+                      <span>Para cubrir: {c.skill}</span>
                     </div>
                     <div className="flex items-center gap-3 text-gray-600 text-sm mb-3">
-                      <div className="inline-flex items-center gap-1">
-                        <Clock size={14} />
+                      <div className="flex items-center gap-1">
+                        <Clock size={14} className="flex-shrink-0" />
                         <span>{c.duration}</span>
                       </div>
-                      <div className="inline-flex items-center gap-1">
-                        <BookOpen size={14} />
+                      <div className="flex items-center gap-1">
+                        <BookOpen size={14} className="flex-shrink-0" />
                         <span>{c.level}</span>
                       </div>
                     </div>
@@ -410,7 +416,7 @@ export function ResultsDashboard({
                       href={c.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-full py-2 border border-purple-600 text-purple-600 rounded-lg hover:bg-blue-50 transition-colors text-sm inline-flex items-center justify-center"
+                      className="mt-auto w-full py-2 border border-purple-600 text-purple-600 rounded-lg hover:bg-purple-50 transition-colors text-sm flex items-center justify-center"
                     >
                       Ver curso
                     </a>

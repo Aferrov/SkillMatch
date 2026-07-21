@@ -286,15 +286,19 @@ export function CourseRecommendations({ profile, onBack }: CourseRecommendations
                   key={c.id}
                   className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:border-purple-300 transition-colors flex flex-col"
                 >
-                  <div className="inline-flex items-center gap-1 px-2 py-1 bg-orange-50 text-orange-700 rounded text-xs mb-3 self-start">
-                    <AlertCircle size={12} />
+                  <div className="flex items-start gap-1 px-2 py-1 bg-orange-50 text-orange-700 rounded text-xs mb-3 self-start max-w-full">
+                    <AlertCircle size={12} className="flex-shrink-0 mt-0.5" />
                     <span>{rec.reason}</span>
                   </div>
 
-                  <div className="flex items-start justify-between mb-3 gap-2">
-                    <h3 className="text-gray-900 flex-1">{c.name}</h3>
+                  {/* min-h reserva 2 líneas para el título: así los bloques de
+                      metadatos quedan alineados entre tarjetas de la misma fila */}
+                  <div className="flex items-start justify-between mb-3 gap-2 min-h-[3rem]">
+                    <h3 className="text-gray-900 flex-1 line-clamp-2 leading-snug">
+                      {c.name}
+                    </h3>
                     {c.rating && (
-                      <div className="inline-flex items-center gap-1 text-yellow-500 flex-shrink-0">
+                      <div className="flex items-center gap-1 text-yellow-500 flex-shrink-0">
                         <Star size={14} fill="currentColor" />
                         <span className="text-gray-900 text-sm">
                           {c.rating}
@@ -303,21 +307,23 @@ export function CourseRecommendations({ profile, onBack }: CourseRecommendations
                     )}
                   </div>
 
+                  {/* `flex` y no `inline-flex`: en línea las tres filas se
+                      apelotonaban en el mismo renglón en vez de apilarse */}
                   <div className="space-y-2 text-gray-600 text-sm mb-4">
-                    <div className="inline-flex items-center gap-1">
-                      <BookOpen size={14} />
+                    <div className="flex items-center gap-1">
+                      <BookOpen size={14} className="flex-shrink-0" />
                       <span>Plataforma:</span>
-                      <span className="text-gray-900">{c.platform}</span>
+                      <span className="text-gray-900 truncate">{c.platform}</span>
                     </div>
-                    <div className="inline-flex items-center gap-1">
-                      <Sparkles size={14} />
+                    <div className="flex items-center gap-1">
+                      <Sparkles size={14} className="flex-shrink-0" />
                       <span>Habilidad:</span>
-                      <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs">
+                      <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs truncate">
                         {c.skill}
                       </span>
                     </div>
-                    <div className="inline-flex items-center gap-1">
-                      <Clock size={14} />
+                    <div className="flex items-center gap-1">
+                      <Clock size={14} className="flex-shrink-0" />
                       <span>Duración:</span>
                       <span className="text-gray-900">{c.duration}</span>
                     </div>
@@ -348,17 +354,17 @@ export function CourseRecommendations({ profile, onBack }: CourseRecommendations
                     )}
                   </div>
 
-                  <div className="mt-auto">
-                    <a
-                      href={c.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full py-2 bg-purple-600 text-white rounded-lg hover:bg-blue-700 transition-colors inline-flex items-center justify-center gap-2"
-                    >
-                      Ver curso
-                      <ExternalLink size={14} />
-                    </a>
-                  </div>
+                  {/* mt-auto pega el botón al fondo: todas las tarjetas de la
+                      fila terminan con el CTA a la misma altura */}
+                  <a
+                    href={c.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-auto w-full py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center gap-2"
+                  >
+                    Ver curso
+                    <ExternalLink size={14} />
+                  </a>
                 </div>
               );
             })}

@@ -12,6 +12,7 @@ from app.routes import cv
 from app.routes import linkedin
 from app.routes import agents as agents_routes
 from app.routes import courses as courses_routes
+from app.routes import auth as auth_routes
 
 
 @asynccontextmanager
@@ -31,6 +32,7 @@ async def lifespan(app: FastAPI):
     orchestrator.start_daily_scheduler(hour=3, minute=0)
 
     print("\n🚀 SkillMatch API lista con agentes de scraping")
+    print("   🔐 Endpoints de auth:    /api/auth/*")
     print("   📡 Endpoints de agentes: /api/agents/*")
     print("   📚 Endpoints de cursos:  /api/courses/*")
     print("   ⏰ Scraping diario:      03:00 AM\n")
@@ -53,6 +55,7 @@ app.add_middleware(
 )
 
 # Rutas
+app.include_router(auth_routes.router, prefix="/api/auth", tags=["Auth"])
 app.include_router(cv.router, prefix="/api/cv", tags=["CV Analysis"])
 app.include_router(linkedin.router, prefix="/api/linkedin", tags=["LinkedIn Analysis"])
 app.include_router(agents_routes.router, prefix="/api/agents", tags=["Agents"])

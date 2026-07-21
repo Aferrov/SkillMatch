@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   ArrowLeft,
   User,
@@ -19,15 +19,24 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import {
-  MOCK_USER_PROFILE,
   type UserProfile,
   type AcademicStatus,
   type SubscriptionPlan,
 } from '../data/userProfile';
 import type { Modalidad } from '../data/vacancies';
+import type { NotificationCenter } from '../data/notifications';
+import type { Screen } from '../hooks/useRouter';
+import { AppHeader } from './AppHeader';
 
 interface ProfilePageProps {
   onBack: () => void;
+  onNavigate: (screen: Screen) => void;
+  onLogout: () => void;
+  /** Perfil real del usuario (análisis guardado + ediciones previas). */
+  profile: UserProfile;
+  /** Persiste los cambios en el backend. */
+  onSave: (profile: UserProfile) => void;
+  notificationCenter: NotificationCenter;
 }
 
 const MODALIDADES: Modalidad[] = ['Presencial', 'Remoto', 'Híbrido'];
@@ -116,11 +125,33 @@ function ChipInput({
   );
 }
 
-export function ProfilePage({ onBack }: ProfilePageProps) {
-  const [profile, setProfile] = useState<UserProfile>(MOCK_USER_PROFILE);
+export function ProfilePage({
+  onBack,
+  onNavigate,
+  onLogout,
+  profile: savedProfile,
+  onSave,
+  notificationCenter,
+}: ProfilePageProps) {
+  const [profile, setProfile] = useState<UserProfile>(savedProfile);
   const [editing, setEditing] = useState<SectionId | null>(null);
-  const [draft, setDraft] = useState<UserProfile>(MOCK_USER_PROFILE);
+  const [draft, setDraft] = useState<UserProfile>(savedProfile);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // El perfil llega de forma asíncrona (sincronización con el backend):
+  // se refresca mientras el usuario no esté editando, para no pisarle los cambios.
+  useEffect(() => {
+    if (editing === null) {
+      setProfile(savedProfile);
+      setDraft(savedProfile);
+    }
+  }, [savedProfile, editing]);
+
+  /** Actualiza el estado local y persiste en el backend. */
+  const commit = (next: UserProfile) => {
+    setProfile(next);
+    onSave(next);
+  };
 
   const startEdit = (section: SectionId) => {
     setDraft(profile);
@@ -131,14 +162,14 @@ export function ProfilePage({ onBack }: ProfilePageProps) {
     setDraft(profile);
   };
   const saveEdit = () => {
-    setProfile(draft);
+    commit(draft);
     setEditing(null);
   };
 
   const handleFileSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setProfile({
+    commit({
       ...profile,
       cvFile: {
         name: file.name,
@@ -150,34 +181,20 @@ export function ProfilePage({ onBack }: ProfilePageProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-lg overflow-hidden">
-                <img
-                  src="/logo_skillmatch.png"
-                  alt="SkillMatch"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <span className="text-gray-900 font-semibold text-lg">
-                SkillMatch
-              </span>
-            </div>
-            <button
-              onClick={onBack}
-              className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900"
-            >
-              <ArrowLeft size={18} />
-              Volver
-            </button>
-          </div>
-        </div>
-      </header>
+      <AppHeader
+        onNavigate={onNavigate}
+        onLogout={onLogout}
+        notificationCenter={notificationCenter}
+      />
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <button
+          onClick={onBack}
+          className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6"
+        >
+          <ArrowLeft size={18} />
+          Volver
+        </button>
         {/* Hero */}
         <div className="bg-white rounded-2xl shadow-sm p-6 mb-6 flex items-start gap-4">
           <div className="w-20 h-20 bg-gradient-to-br from-blue-400 to-purple-400 rounded-full flex items-center justify-center flex-shrink-0">
@@ -803,7 +820,7 @@ export function ProfilePage({ onBack }: ProfilePageProps) {
                   <Crown size={22} />
                   <h3 className="text-white text-lg">Plan Premium</h3>
                 </div>
-                <span className="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm">
+                <span className="bg-white/20 px-3 py-1 rounded-full text-sm">
                   Activo
                 </span>
               </div>
@@ -813,7 +830,7 @@ export function ProfilePage({ onBack }: ProfilePageProps) {
               <div className="flex flex-wrap gap-3">
                 <button
                   onClick={() => setProfile({ ...profile, plan: 'Free' })}
-                  className="px-4 py-2 bg-white bg-opacity-20 hover:bg-opacity-30 text-white rounded-lg transition-colors"
+                  className="px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-colors"
                 >
                   Cambiar a Gratis
                 </button>

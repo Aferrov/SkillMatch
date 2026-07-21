@@ -11,12 +11,7 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 
-interface ManualProfileProps {
-  onComplete: () => void;
-  onBack: () => void;
-}
-
-interface FormData {
+export interface ManualProfileData {
   fullName: string;
   jobTitle: string;
   city: string;
@@ -25,6 +20,11 @@ interface FormData {
   institution: string;
   skills: string[];
   summary: string;
+}
+
+interface ManualProfileProps {
+  onComplete: (data: ManualProfileData) => void;
+  onBack: () => void;
 }
 
 const EXPERIENCE_OPTIONS = [
@@ -56,7 +56,7 @@ const SUGGESTED_SKILLS = [
 ];
 
 export function ManualProfile({ onComplete, onBack }: ManualProfileProps) {
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<ManualProfileData>({
     fullName: '',
     jobTitle: '',
     city: '',
@@ -122,7 +122,7 @@ export function ManualProfile({ onComplete, onBack }: ManualProfileProps) {
     }
 
     setError('');
-    onComplete();
+    onComplete(formData);
   };
 
   return (
