@@ -21,16 +21,17 @@ import {
   getUniqueModalidades,
   type Modalidad,
 } from '../data/vacancies';
-import { MOCK_USER_PROFILE } from '../data/userProfile';
+import type { UserProfile } from '../data/userProfile';
 import { calculateAllMatches, matchBadgeClasses, matchLabel } from '../data/matching';
 
 interface VacancyListProps {
+  profile: UserProfile;
   onBack: () => void;
 }
 
 type SortMode = 'match' | 'recent';
 
-export function VacancyList({ onBack }: VacancyListProps) {
+export function VacancyList({ profile, onBack }: VacancyListProps) {
   const [query, setQuery] = useState('');
   const [modalidadFilter, setModalidadFilter] = useState<Modalidad | 'Todas'>(
     'Todas',
@@ -42,8 +43,8 @@ export function VacancyList({ onBack }: VacancyListProps) {
   const locations = useMemo(() => getUniqueLocations(), []);
   const modalidades = useMemo(() => getUniqueModalidades(), []);
   const allMatches = useMemo(
-    () => calculateAllMatches(MOCK_USER_PROFILE, VACANCIES),
-    [],
+    () => calculateAllMatches(profile, VACANCIES),
+    [profile],
   );
 
   const filtered = useMemo(() => {
@@ -68,7 +69,7 @@ export function VacancyList({ onBack }: VacancyListProps) {
       return haystack.includes(q);
     });
     if (sortMode === 'match') {
-      return base;
+      return base.sort((a, b) => b.score - a.score);
     }
     return [...base].sort(
       (a, b) =>

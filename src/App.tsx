@@ -330,6 +330,7 @@ function AppRoutes() {
     case 'skillGap':
       return (
         <SkillGapAnalysis
+          profile={analysisProfile}
           onBack={() => back('results')}
           onSeeVacancies={() => navigate('vacancies')}
           onSeeCourses={() => navigate('courses')}
@@ -354,7 +355,7 @@ function AppRoutes() {
       );
 
     case 'vacancies':
-      return <VacancyList onBack={() => back('results')} />;
+      return <VacancyList profile={analysisProfile} onBack={() => back('results')} />;
 
     case 'profile':
       return (

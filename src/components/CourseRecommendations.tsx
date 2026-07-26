@@ -278,23 +278,21 @@ export function CourseRecommendations({ profile, onBack }: CourseRecommendations
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filtered.map((rec) => {
               const c = rec.course;
               return (
                 <div
                   key={c.id}
-                  className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:border-purple-300 transition-colors flex flex-col"
+                  className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:border-purple-300 transition-colors flex flex-col h-full overflow-hidden"
                 >
-                  <div className="flex items-start gap-1 px-2 py-1 bg-orange-50 text-orange-700 rounded text-xs mb-3 self-start max-w-full">
+                  <div className="flex items-start gap-1 px-2 py-1 bg-orange-50 text-orange-700 rounded text-xs mb-3 self-start w-full">
                     <AlertCircle size={12} className="flex-shrink-0 mt-0.5" />
-                    <span>{rec.reason}</span>
+                    <span className="break-words whitespace-normal">{rec.reason}</span>
                   </div>
 
-                  {/* min-h reserva 2 líneas para el título: así los bloques de
-                      metadatos quedan alineados entre tarjetas de la misma fila */}
-                  <div className="flex items-start justify-between mb-3 gap-2 min-h-[3rem]">
-                    <h3 className="text-gray-900 flex-1 line-clamp-2 leading-snug">
+                  <div className="flex items-start justify-between mb-3 gap-2">
+                    <h3 className="text-gray-900 flex-1 break-words font-medium leading-snug">
                       {c.name}
                     </h3>
                     {c.rating && (
@@ -307,29 +305,27 @@ export function CourseRecommendations({ profile, onBack }: CourseRecommendations
                     )}
                   </div>
 
-                  {/* `flex` y no `inline-flex`: en línea las tres filas se
-                      apelotonaban en el mismo renglón en vez de apilarse */}
-                  <div className="space-y-2 text-gray-600 text-sm mb-4">
-                    <div className="flex items-center gap-1">
-                      <BookOpen size={14} className="flex-shrink-0" />
-                      <span>Plataforma:</span>
-                      <span className="text-gray-900 truncate">{c.platform}</span>
+                  <div className="space-y-2 text-gray-600 text-sm mb-4 flex-grow">
+                    <div className="flex items-start gap-1">
+                      <BookOpen size={14} className="flex-shrink-0 mt-1" />
+                      <span className="font-medium flex-shrink-0">Plataforma:</span>
+                      <span className="text-gray-900 break-words">{c.platform}</span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Sparkles size={14} className="flex-shrink-0" />
-                      <span>Habilidad:</span>
-                      <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs truncate">
+                    <div className="flex items-start gap-1">
+                      <Sparkles size={14} className="flex-shrink-0 mt-1" />
+                      <span className="font-medium flex-shrink-0">Habilidad:</span>
+                      <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs break-words inline-block mt-0.5">
                         {c.skill}
                       </span>
                     </div>
                     <div className="flex items-center gap-1">
                       <Clock size={14} className="flex-shrink-0" />
-                      <span>Duración:</span>
+                      <span className="font-medium flex-shrink-0">Duración:</span>
                       <span className="text-gray-900">{c.duration}</span>
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap gap-2 mb-4">
+                  <div className="flex flex-wrap gap-2 mb-4 mt-auto">
                     <span
                       className={`px-2 py-1 rounded text-xs ${
                         c.level === 'Básico'
@@ -354,13 +350,11 @@ export function CourseRecommendations({ profile, onBack }: CourseRecommendations
                     )}
                   </div>
 
-                  {/* mt-auto pega el botón al fondo: todas las tarjetas de la
-                      fila terminan con el CTA a la misma altura */}
                   <a
                     href={c.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-auto w-full py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center gap-2"
+                    className="w-full py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center gap-2 mt-2"
                   >
                     Ver curso
                     <ExternalLink size={14} />

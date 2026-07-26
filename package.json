@@ -60,6 +60,6 @@
             "dev": "vite",
             "typecheck": "tsc --noEmit",
             "build": "tsc --noEmit && vite build",
-            "dev:backend": "cd \"SkillMatch Backend\" && python app/main.py"
+            "dev:backend": "cd \"SkillMatch Backend\" && set PYTHONIOENCODING=utf-8&& python app/main.py"
       }
 }

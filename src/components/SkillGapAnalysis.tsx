@@ -10,10 +10,11 @@ import {
   GraduationCap,
 } from 'lucide-react';
 import { VACANCIES } from '../data/vacancies';
-import { MOCK_USER_PROFILE } from '../data/userProfile';
+import type { UserProfile } from '../data/userProfile';
 import { analyzeSkillGap } from '../data/matching';
 
 interface SkillGapAnalysisProps {
+  profile: UserProfile;
   onBack: () => void;
   onSeeVacancies: () => void;
   onSeeCourses?: () => void;
@@ -22,6 +23,7 @@ interface SkillGapAnalysisProps {
 type Filter = 'all' | 'detected' | 'missing';
 
 export function SkillGapAnalysis({
+  profile,
   onBack,
   onSeeVacancies,
   onSeeCourses,
@@ -30,8 +32,8 @@ export function SkillGapAnalysis({
   const [query, setQuery] = useState('');
 
   const entries = useMemo(
-    () => analyzeSkillGap(MOCK_USER_PROFILE, VACANCIES),
-    [],
+    () => analyzeSkillGap(profile, VACANCIES),
+    [profile],
   );
 
   const detected = entries.filter((e) => e.status === 'Detectada').length;

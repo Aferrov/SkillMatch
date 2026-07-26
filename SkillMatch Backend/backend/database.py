@@ -124,4 +124,4 @@ class AgentRun(Base):
 
 def init_db():
     Base.metadata.create_all(engine)
-    print("✓ Base de datos lista (jobs, courses, agent_runs, users)")
+    print("[OK] Base de datos lista (jobs, courses, agent_runs, users)")
