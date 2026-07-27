@@ -275,8 +275,6 @@ export function UploadCV({ onUpload, onBack, onManualEntry }: UploadCVProps) {
               )}
             </button>
           </div>
-
-          </div>
         </div>
 
         {/* Info / Privacy */}
