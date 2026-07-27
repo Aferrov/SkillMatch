@@ -292,19 +292,6 @@ export function UploadCV({ onUpload, onBack, onManualEntry }: UploadCVProps) {
           </div>
         </div>
 
-        {/* Alternative */}
-        <div className="text-center mt-6">
-          <p className="text-gray-500 text-sm">
-            ¿No tienes CV ni LinkedIn?{' '}
-            <button
-              type="button"
-              onClick={onManualEntry}
-              className="text-blue-600 hover:underline"
-            >
-              Completar mi perfil manualmente
-            </button>
-          </p>
-        </div>
       </div>
     </div>
   );
