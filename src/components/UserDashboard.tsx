@@ -13,7 +13,7 @@ import {
   Sparkles,
   AlertCircle,
 } from "lucide-react";
-import { AppHeader } from "./AppHeader";
+
 import { formatSalary } from "../data/vacancies";
 import { matchBadgeClasses } from "../data/matching";
 import type { UserProfile } from "../data/userProfile";
@@ -87,12 +87,6 @@ export function UserDashboard({
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <AppHeader
-        onNavigate={onNavigate}
-        onLogout={onLogout}
-        notificationCenter={notificationCenter}
-      />
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Bienvenida */}
         <div className="mb-8">

@@ -79,18 +79,18 @@ export function UploadCV({ onUpload, onBack, onManualEntry }: UploadCVProps) {
 
   const handleUpload = async () => {
     if (!selectedFile) return;
-    
+
     setIsAnalyzing(true);
     setFileError('');
-    
+
     const result = await analyzeCV(selectedFile);
-    
+
     if (!result.success) {
       setFileError(result.error || 'Error al analizar el CV');
       setIsAnalyzing(false);
       return;
     }
-    
+
     // Si el análisis es exitoso, pasar los datos al componente padre
     onUpload(result.data);
   };
@@ -193,11 +193,10 @@ export function UploadCV({ onUpload, onBack, onManualEntry }: UploadCVProps) {
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
-              className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
-                isDragging
+              className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${isDragging
                   ? 'border-blue-500 bg-blue-50'
                   : 'border-gray-300 hover:border-gray-400'
-              }`}
+                }`}
             >
               {selectedFile ? (
                 <div className="space-y-3">
@@ -259,11 +258,10 @@ export function UploadCV({ onUpload, onBack, onManualEntry }: UploadCVProps) {
             <button
               onClick={handleUpload}
               disabled={!selectedFile || isAnalyzing}
-              className={`w-full py-3 rounded-lg transition-colors mt-6 flex items-center justify-center gap-2 ${
-                selectedFile && !isAnalyzing
+              className={`w-full py-3 rounded-lg transition-colors mt-6 flex items-center justify-center gap-2 ${selectedFile && !isAnalyzing
                   ? 'bg-blue-600 text-white hover:bg-blue-700'
                   : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-              }`}
+                }`}
             >
               {isAnalyzing ? (
                 <>

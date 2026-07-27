@@ -26,7 +26,6 @@ import {
 import type { Modalidad } from '../data/vacancies';
 import type { NotificationCenter } from '../data/notifications';
 import type { Screen } from '../hooks/useRouter';
-import { AppHeader } from './AppHeader';
 
 interface ProfilePageProps {
   onBack: () => void;
@@ -181,20 +180,7 @@ export function ProfilePage({
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <AppHeader
-        onNavigate={onNavigate}
-        onLogout={onLogout}
-        notificationCenter={notificationCenter}
-      />
-
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <button
-          onClick={onBack}
-          className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6"
-        >
-          <ArrowLeft size={18} />
-          Volver
-        </button>
         {/* Hero */}
         <div className="bg-white rounded-2xl shadow-sm p-6 mb-6 flex items-start gap-4">
           <div className="w-20 h-20 bg-gradient-to-br from-blue-400 to-purple-400 rounded-full flex items-center justify-center flex-shrink-0">

@@ -7,6 +7,7 @@ import {
   Search,
   User,
   X,
+  ArrowLeft,
 } from 'lucide-react';
 import { VACANCIES, formatSalary } from '../data/vacancies';
 import { COURSES } from '../data/courses';
@@ -17,6 +18,7 @@ export interface AppHeaderProps {
   onNavigate: (screen: Screen) => void;
   onLogout: () => void;
   notificationCenter: NotificationCenter;
+  onBack?: () => void;
 }
 
 interface SearchHit {
@@ -75,6 +77,7 @@ export function AppHeader({
   onNavigate,
   onLogout,
   notificationCenter,
+  onBack,
 }: AppHeaderProps) {
   const { notifications, unreadIds, markRead, markAllRead } = notificationCenter;
   const [query, setQuery] = useState('');
@@ -129,23 +132,34 @@ export function AppHeader({
     <header className="bg-white border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex items-center justify-between gap-4">
-          {/* Logo */}
-          <button
-            onClick={() => onNavigate('dashboard')}
-            className="flex items-center gap-2 flex-shrink-0"
-            title="Ir al panel"
-          >
-            <div className="w-10 h-10 rounded-lg overflow-hidden">
-              <img
-                src="/logo_skillmatch.png"
-                alt="SkillMatch"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <span className="text-gray-900 font-semibold text-lg hidden sm:inline">
-              SkillMatch
-            </span>
-          </button>
+          {/* Logo y Atrás */}
+          <div className="flex items-center gap-4 flex-shrink-0">
+            {onBack && (
+              <button
+                onClick={onBack}
+                className="text-gray-600 hover:text-gray-900"
+                aria-label="Volver"
+              >
+                <ArrowLeft size={24} />
+              </button>
+            )}
+            <button
+              onClick={() => onNavigate('dashboard')}
+              className="flex items-center gap-2 flex-shrink-0"
+              title="Ir al panel"
+            >
+              <div className="w-10 h-10 rounded-lg overflow-hidden">
+                <img
+                  src="/logo_skillmatch.png"
+                  alt="SkillMatch"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <span className="text-gray-900 font-semibold text-lg hidden sm:inline">
+                SkillMatch
+              </span>
+            </button>
+          </div>
 
           {/* Buscador */}
           <div ref={searchRef} className="relative flex-1 max-w-md">

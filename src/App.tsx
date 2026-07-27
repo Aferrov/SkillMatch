@@ -14,6 +14,7 @@ import { SkillGapAnalysis } from './components/SkillGapAnalysis';
 import { CourseRecommendations } from './components/CourseRecommendations';
 import { ProfilePage } from './components/ProfilePage';
 import { UserDashboard } from './components/UserDashboard';
+import { AppHeader } from './components/AppHeader';
 import { SessionLoading } from './components/SessionLoading';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { useRouter, pathToScreen, type Screen } from './hooks/useRouter';
@@ -245,13 +246,29 @@ function AppRoutes() {
 
   // ─── Render ───────────────────────────────────────────────────────
 
-  // Mientras se valida el token no se pinta nada que dependa de la sesión,
-  // para evitar el parpadeo de "login → contenido".
   if (status === 'checking') {
     return <SessionLoading />;
   }
 
-  switch (screen) {
+  const showAppHeader =
+    isAuthenticated &&
+    !PUBLIC_SCREENS.has(screen) &&
+    !['upload', 'manualProfile', 'preferences', 'analyzing', 'cvReview'].includes(screen);
+
+  let headerBackAction: (() => void) | undefined;
+  if (screen === 'results' || screen === 'profile') {
+    headerBackAction = () => back('dashboard');
+  } else if (
+    screen === 'skillGap' ||
+    screen === 'courses' ||
+    screen === 'recommendations' ||
+    screen === 'vacancies'
+  ) {
+    headerBackAction = () => back('results');
+  }
+
+  const content = (() => {
+    switch (screen) {
     case 'login':
       return (
         <Login
@@ -391,7 +408,22 @@ function AppRoutes() {
           userName={user?.name}
         />
       );
-  }
+    }
+  })();
+
+  return (
+    <>
+      {showAppHeader && (
+        <AppHeader
+          onNavigate={(target) => navigate(target)}
+          onLogout={handleLogout}
+          notificationCenter={dashboardData.notificationCenter}
+          onBack={headerBackAction}
+        />
+      )}
+      {content}
+    </>
+  );
 }
 
 export default function App() {
