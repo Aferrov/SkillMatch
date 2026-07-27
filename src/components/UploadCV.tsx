@@ -4,14 +4,13 @@ import {
   FileText,
   X,
   ArrowLeft,
-  Linkedin,
   Zap,
   ShieldCheck,
   AlertCircle,
   CheckCircle2,
   Loader2,
 } from 'lucide-react';
-import { analyzeCV, analyzeLinkedIn } from '../services/api';
+import { analyzeCV } from '../services/api';
 
 interface UploadCVProps {
   onUpload: (data?: any) => void;
@@ -32,12 +31,6 @@ export function UploadCV({ onUpload, onBack, onManualEntry }: UploadCVProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [fileError, setFileError] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-
-  const [linkedinUrl, setLinkedinUrl] = useState('');
-  const [linkedinStatus, setLinkedinStatus] = useState<
-    'idle' | 'connecting' | 'error'
-  >('idle');
-  const [linkedinError, setLinkedinError] = useState('');
 
   const validateFile = (file: File): string => {
     if (!ACCEPTED_MIME_TYPES.includes(file.type)) {
@@ -99,35 +92,6 @@ export function UploadCV({ onUpload, onBack, onManualEntry }: UploadCVProps) {
     }
     
     // Si el análisis es exitoso, pasar los datos al componente padre
-    onUpload(result.data);
-  };
-
-  const handleLinkedinConnect = async () => {
-    const url = linkedinUrl.trim();
-    if (!url) {
-      setLinkedinError('Ingresa la URL de tu perfil de LinkedIn.');
-      return;
-    }
-    if (!/linkedin\.com\/in\//i.test(url)) {
-      setLinkedinError(
-        'La URL debe ser un perfil válido (linkedin.com/in/usuario).'
-      );
-      return;
-    }
-    setLinkedinError('');
-    setLinkedinStatus('connecting');
-
-    const result = await analyzeLinkedIn(url);
-    console.log('LinkedIn API result:', result);
-
-    if (!result.success) {
-      setLinkedinStatus('error');
-      setLinkedinError(result.error || 'Error al analizar el perfil de LinkedIn.');
-      return;
-    }
-
-    // Pasar los datos reales al componente padre
-    setLinkedinStatus('idle');
     onUpload(result.data);
   };
 
@@ -209,8 +173,8 @@ export function UploadCV({ onUpload, onBack, onManualEntry }: UploadCVProps) {
           </p>
         </div>
 
-        {/* Two-path onboarding */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        {/* Single-path onboarding */}
+        <div className="max-w-md mx-auto mb-8">
           {/* Path 1: CV upload */}
           <div className="bg-white rounded-2xl shadow-sm p-8 border border-gray-100">
             <div className="flex items-center gap-3 mb-4">
@@ -312,88 +276,6 @@ export function UploadCV({ onUpload, onBack, onManualEntry }: UploadCVProps) {
             </button>
           </div>
 
-          {/* Path 2: LinkedIn */}
-          <div className="bg-white rounded-2xl shadow-sm p-8 border border-gray-100">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
-                <Linkedin className="text-white" size={24} />
-              </div>
-              <div>
-                <h2 className="text-gray-900">Conecta con LinkedIn</h2>
-                <p className="text-gray-600 text-sm">
-                  Importamos tu perfil automáticamente
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-blue-50 rounded-xl p-5 mb-4">
-              <p className="text-gray-700 mb-3 text-sm">
-                Trae automáticamente tu:
-              </p>
-              <ul className="space-y-2">
-                {[
-                  'Experiencia laboral',
-                  'Habilidades y validaciones',
-                  'Estudios y certificaciones',
-                  'Foto de perfil',
-                ].map((item) => (
-                  <li
-                    key={item}
-                    className="flex items-center gap-2 text-gray-600 text-sm"
-                  >
-                    <CheckCircle2
-                      className="text-blue-600 flex-shrink-0"
-                      size={16}
-                    />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <label className="block text-gray-700 mb-2 text-sm">
-              URL de tu perfil de LinkedIn
-            </label>
-            <input
-              type="url"
-              value={linkedinUrl}
-              onChange={(e) => {
-                setLinkedinUrl(e.target.value);
-                if (linkedinError) setLinkedinError('');
-              }}
-              disabled={linkedinStatus === 'connecting'}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="https://linkedin.com/in/tu-usuario"
-            />
-
-            {linkedinError && (
-              <div className="bg-red-100 text-red-700 rounded-lg p-4 flex items-center gap-2 mt-4">
-                <AlertCircle size={18} className="flex-shrink-0" />
-                <span className="text-sm">{linkedinError}</span>
-              </div>
-            )}
-
-            <button
-              onClick={handleLinkedinConnect}
-              disabled={linkedinStatus === 'connecting'}
-              className={`w-full py-3 rounded-lg transition-colors mt-6 flex items-center justify-center gap-2 ${
-                linkedinStatus === 'connecting'
-                  ? 'bg-blue-600 text-white cursor-not-allowed'
-                  : 'bg-blue-600 text-white hover:bg-blue-700'
-              }`}
-            >
-              {linkedinStatus === 'connecting' ? (
-                <>
-                  <Loader2 className="animate-spin" size={18} />
-                  Conectando…
-                </>
-              ) : (
-                <>
-                  <Linkedin size={18} />
-                  Conectar con LinkedIn
-                </>
-              )}
-            </button>
           </div>
         </div>
 
@@ -405,7 +287,7 @@ export function UploadCV({ onUpload, onBack, onManualEntry }: UploadCVProps) {
           <div>
             <h3 className="text-gray-900 mb-1">Tu información está protegida</h3>
             <p className="text-gray-600 text-sm">
-              Solo usamos tu CV o tu perfil para generar recomendaciones
+              Solo usamos tu CV para generar recomendaciones
               personalizadas. No compartimos tus datos con terceros y puedes
               eliminarlos cuando quieras desde tu panel.
             </p>

@@ -9,7 +9,6 @@ from contextlib import asynccontextmanager
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from app.routes import cv
-from app.routes import linkedin
 from app.routes import agents as agents_routes
 from app.routes import courses as courses_routes
 from app.routes import auth as auth_routes
@@ -57,7 +56,6 @@ app.add_middleware(
 # Rutas
 app.include_router(auth_routes.router, prefix="/api/auth", tags=["Auth"])
 app.include_router(cv.router, prefix="/api/cv", tags=["CV Analysis"])
-app.include_router(linkedin.router, prefix="/api/linkedin", tags=["LinkedIn Analysis"])
 app.include_router(agents_routes.router, prefix="/api/agents", tags=["Agents"])
 app.include_router(courses_routes.router, prefix="/api/courses", tags=["Courses"])
 

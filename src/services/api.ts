@@ -4,7 +4,6 @@
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 const CV_ENDPOINT = import.meta.env.VITE_API_CV_ENDPOINT || "/api/cv/analyze";
-const LINKEDIN_ENDPOINT = "/api/linkedin/analyze";
 
 interface ApiResponse<T> {
   success: boolean;
@@ -65,48 +64,6 @@ export async function analyzeCV(file: File): Promise<ApiResponse<any>> {
   }
 }
 
-/**
- * Analiza un perfil de LinkedIn dado su URL
- * @param linkedinUrl - URL del perfil (https://linkedin.com/in/usuario)
- * @returns Respuesta del análisis (mismo formato que analyzeCV)
- */
-export async function analyzeLinkedIn(linkedinUrl: string): Promise<ApiResponse<any>> {
-  try {
-    const response = await fetch(`${API_BASE_URL}${LINKEDIN_ENDPOINT}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ url: linkedinUrl }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      return {
-        success: false,
-        error: data.detail || "Error al analizar el perfil de LinkedIn",
-        status: response.status,
-      };
-    }
-
-    return {
-      success: true,
-      data,
-      status: response.status,
-    };
-  } catch (error) {
-    console.error("Error en analyzeLinkedIn:", error);
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Error de conexión con el servidor",
-      status: 0,
-    };
-  }
-}
 
 /**
  * Obtiene el estado del backend
